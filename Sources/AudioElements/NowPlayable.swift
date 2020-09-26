@@ -82,14 +82,14 @@ extension NowPlayable {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
     
-    public func setPlaybackInfo(playbackRate: Float, elapsedPlaybackTime: Float) {
+    public func setPlaybackInfo(playbackRate: Float, playbackTime: Float) {
         
         let nowPlayingInfoCenter = MPNowPlayingInfoCenter.default()
         var info = nowPlayingInfoCenter.nowPlayingInfo ?? [String: Any]()
         
         info[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
         info[MPNowPlayingInfoPropertyPlaybackRate] = playbackRate
-        info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsedPlaybackTime
+        info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = playbackTime
         
         nowPlayingInfoCenter.nowPlayingInfo = info
     }

@@ -23,7 +23,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         get { timePitchNode.rate }
         set {
             timePitchNode.rate = newValue
-            setPlaybackInfo(playbackRate: newValue, elapsedPlaybackTime: Float(currentTime))
+            setPlaybackInfo(playbackRate: newValue, playbackTime: Float(currentTime))
         }
     }
     
@@ -55,7 +55,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         try activateAudioSession()
         
         enableRemoteCommands()
-        setPlaybackInfo(playbackRate: 0.0, elapsedPlaybackTime: 0.0)
+        setPlaybackInfo(playbackRate: 0.0, playbackTime: 0.0)
     }
     
     public convenience init(item: NowPlayableItem) throws {
@@ -70,7 +70,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         
         try super.load(url: itemURL)
         
-        setPlaybackInfo(playbackRate: 0.0, elapsedPlaybackTime: 0.0)
+        setPlaybackInfo(playbackRate: 0.0, playbackTime: 0.0)
     }
     
     public func load(item: NowPlayableItem) throws {
@@ -78,7 +78,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         try super.load(url: item.assetURL)
         
         setNowPlayingInfo(from: item)
-        setPlaybackInfo(playbackRate: 0.0, elapsedPlaybackTime: 0.0)
+        setPlaybackInfo(playbackRate: 0.0, playbackTime: 0.0)
     }
     
     //MARK: - Playback control functions
@@ -94,7 +94,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         
         super.pause()
         
-        setPlaybackInfo(playbackRate: 0.0, elapsedPlaybackTime: Float(currentTime))
+        setPlaybackInfo(playbackRate: 0.0, playbackTime: Float(currentTime))
     }
     
     public override func stop() {
