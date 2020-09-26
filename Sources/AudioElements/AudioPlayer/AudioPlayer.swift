@@ -38,6 +38,11 @@ open class AudioPlayer {
         audioFile.duration
     }
     
+    public var volume: Float {
+        get { engine.mainMixerNode.outputVolume }
+        set { engine.mainMixerNode.outputVolume = max(0.0, min(newValue, 1.0)) }
+    }
+    
     public var audioFile: AVAudioFile!
     
     public let engine: AVAudioEngine = .init()
