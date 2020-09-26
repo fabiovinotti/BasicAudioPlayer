@@ -94,12 +94,12 @@ extension NowPlayable {
         nowPlayingInfoCenter.nowPlayingInfo = info
     }
     
-    public func updateNowPlayingInfo(playbackTime: TimeInterval) {
+    public func updateNowPlayingInfo(playbackTime: Float) {
         
         let nowPlayingInfoCenter = MPNowPlayingInfoCenter.default()
         
         if var info = nowPlayingInfoCenter.nowPlayingInfo {
-            info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = NSNumber(floatLiteral: playbackTime)
+            info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = playbackTime
             nowPlayingInfoCenter.nowPlayingInfo = info
         }
         

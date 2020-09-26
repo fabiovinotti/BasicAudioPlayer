@@ -15,7 +15,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         get { super.currentTime }
         set {
             super.currentTime = newValue
-            updateNowPlayingInfo(playbackTime: currentTime)
+            updateNowPlayingInfo(playbackTime: Float(currentTime))
         }
     }
     
