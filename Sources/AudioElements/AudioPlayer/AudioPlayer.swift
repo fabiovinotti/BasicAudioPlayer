@@ -103,6 +103,7 @@ open class AudioPlayer {
     //MARK: - Playback Control Functions
     
     open func play() {
+        guard status != .playing else { return }
         
         if !engine.isRunning {
             do { try engine.start() }
