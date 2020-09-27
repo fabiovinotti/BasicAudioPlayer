@@ -90,7 +90,8 @@ open class AudioPlayer {
         engine.connect(playerNode, to: engine.mainMixerNode, format: audioFile.processingFormat)
     }
     
-    private func completionHandler() {
+    /// The function called when the scheduled audio has been completely played.
+    open func completionHandler() {
         DispatchQueue.main.async { [unowned self] in
             segmentStartingFrame = 0
             mustReschedule = true
