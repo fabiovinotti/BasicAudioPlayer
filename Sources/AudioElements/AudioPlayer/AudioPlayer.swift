@@ -91,14 +91,22 @@ open class AudioPlayer {
     }
     
     /// The function called when the scheduled audio has been completely played.
-    open func completionHandler() {
-        DispatchQueue.main.async { [unowned self] in
-            segmentStartingFrame = 0
-            mustReschedule = true
-            
-            loops ? play() : engine.stop()
+        open func completionHandler() {
+            DispatchQueue.main.async {
+                self.segmentStartingFrame = 0
+                
+                if self.loops {
+                    self.playerNode.stop()
+                    self.playerNode.scheduleFile(self.audioFile, at: nil, completionHandler: self.completionHandler)
+                    self.playerNode.play()
+                }
+                else {
+                    self.mustReschedule = true
+                    self.engine.stop()
+                    self.status = .ready
+                }
+            }
         }
-    }
     
     //MARK: - Playback Control Functions
     
