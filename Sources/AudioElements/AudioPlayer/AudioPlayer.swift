@@ -137,24 +137,26 @@ open class AudioPlayer {
     
     internal func seek(to frame: AVAudioFramePosition) {
         
-        segmentStartingFrame = min(max(0, frame), audioFile.length)
-        
-        if segmentStartingFrame == audioFile.length {
-            stop()
-            return
+        if frame >= audioFile.length {
+            loops ? seek(to: 0) : stop()
+        }
+        else {
+            segmentStartingFrame = max(0, frame)
+            
+            let wasPlaying = playerNode.isPlaying
+            
+            playerNode.stop()
+            
+            playerNode.scheduleSegment(audioFile,
+                                       startingFrame: segmentStartingFrame,
+                                       frameCount: AVAudioFrameCount(audioFile.length - segmentStartingFrame),
+                                       at: nil,
+                                       completionHandler: completionHandler)
+            
+            if mustReschedule { mustReschedule = false }
+            if wasPlaying { playerNode.play() }
         }
         
-        let wasPlaying = playerNode.isPlaying
-        playerNode.stop()
-        
-        playerNode.scheduleSegment(audioFile,
-                                   startingFrame: segmentStartingFrame,
-                                   frameCount: AVAudioFrameCount(audioFile.length - segmentStartingFrame),
-                                   at: nil,
-                                   completionHandler: completionHandler)
-        
-        if mustReschedule { mustReschedule = false }
-        if wasPlaying { playerNode.play() }
     }
     
 }
