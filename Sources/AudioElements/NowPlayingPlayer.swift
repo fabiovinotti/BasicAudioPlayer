@@ -46,6 +46,14 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         engine.connect(timePitchNode, to: engine.mainMixerNode, format: audioFile.processingFormat)
     }
     
+    open override func completionHandler() {
+        super.completionHandler()
+        
+        DispatchQueue.main.async {
+            self.updateNowPlayingInfo(playbackTime: Float(self.currentTime))
+        }
+    }
+    
     //MARK: - Initializers
     
     public override init(url itemURL: URL) throws {
