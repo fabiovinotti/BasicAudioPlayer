@@ -54,7 +54,7 @@ open class AudioPlayer {
     
     /// If true the player must reschedule the AVAudioFile on playing.
     private var mustReschedule: Bool = false
-        
+    
     public init(url itemURL: URL) throws {
         
         audioFile = try AVAudioFile(forReading: itemURL)
