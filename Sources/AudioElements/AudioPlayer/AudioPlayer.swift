@@ -77,6 +77,8 @@ open class AudioPlayer {
         
         playerNode.scheduleFile(audioFile, at: nil, completionHandler: completionHandler)
         
+        if mustReschedule { mustReschedule = false }
+        
         engine.prepare()
     }
     
