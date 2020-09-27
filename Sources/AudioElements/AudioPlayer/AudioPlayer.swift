@@ -48,8 +48,8 @@ open class AudioPlayer {
     public let engine: AVAudioEngine = .init()
     
     public let playerNode: AudioPlayerNode = .init()
-        
-    /// The starting frame of the scheduled segment in relation to the audio file sample length.
+    
+    /// The starting frame of the scheduled segment of the audio file.
     private var segmentStartingFrame: AVAudioFramePosition = 0
     
     /// If true the player must reschedule the AVAudioFile on playing.
