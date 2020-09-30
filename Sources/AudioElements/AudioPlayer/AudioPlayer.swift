@@ -15,7 +15,7 @@ open class AudioPlayer {
     }
     
     public var loops: Bool = false
-        
+    
     public var delegate: AudioPlayerDelegate?
     
     public var currentFrame: AVAudioFramePosition {
