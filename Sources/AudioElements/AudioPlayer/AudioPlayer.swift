@@ -6,8 +6,6 @@
 //
 
 import AVFoundation
-import MediaPlayer
-import Combine
 
 /// A base class to create audio players based on AVAudioEngine.
 open class AudioPlayer {
