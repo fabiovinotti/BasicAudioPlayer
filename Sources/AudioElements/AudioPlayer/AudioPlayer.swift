@@ -33,7 +33,7 @@ open class AudioPlayer {
     }
     
     public var duration: TimeInterval {
-        audioFile.duration
+        Double(audioFile.length) / audioFile.processingFormat.sampleRate
     }
     
     public var volume: Float {
