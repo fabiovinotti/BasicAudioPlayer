@@ -92,7 +92,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
     //MARK: - Playback control functions
     
     public override func play() {
-
+        
         super.play()
         
         updateNowPlayingInfo(playbackRate: timePitchNode.rate)
