@@ -10,7 +10,7 @@ import AVFoundation
 /// A base class to create audio players based on AVAudioEngine.
 open class AudioPlayer {
     
-    public var status: PlaybackStatus = .ready {
+    public private(set) var status: PlaybackStatus = .ready {
         didSet { delegate?.audioPlayerStatusChanged(self) }
     }
     
