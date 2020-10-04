@@ -1,5 +1,5 @@
 //
-//  AudioPlayer+PlaybackStatus.swift
+//  AudioPlayer+Status.swift
 //  
 //
 //  Created by Fabio Vinotti on 9/18/20.
@@ -9,7 +9,7 @@ import Foundation
 
 extension AudioPlayer {
     
-    public enum PlaybackStatus {
+    public enum Status {
         
         /// Ready to start playing.
         case ready
