@@ -60,7 +60,7 @@ open class AudioPlayer {
         attachNodes()
         connectNodes()
         
-        playerNode.scheduleFile(audioFile, at: nil, completionHandler: completionHandler)
+        playerNode.scheduleFile(audioFile, at: nil, completionHandler: playbackCompletionHandler)
         
         engine.prepare()
     }
@@ -73,7 +73,7 @@ open class AudioPlayer {
         
         connectNodes()
         
-        playerNode.scheduleFile(audioFile, at: nil, completionHandler: completionHandler)
+        playerNode.scheduleFile(audioFile, at: nil, completionHandler: playbackCompletionHandler)
         
         if mustReschedule { mustReschedule = false }
         
@@ -101,7 +101,7 @@ open class AudioPlayer {
         if mustReschedule {
             mustReschedule = false
             playerNode.stop()
-            playerNode.scheduleFile(audioFile, at: nil, completionHandler: completionHandler)
+            playerNode.scheduleFile(audioFile, at: nil, completionHandler: playbackCompletionHandler)
         }
         
         playerNode.play()
@@ -139,7 +139,7 @@ open class AudioPlayer {
                                        startingFrame: segmentStartingFrame,
                                        frameCount: AVAudioFrameCount(audioFile.length - segmentStartingFrame),
                                        at: nil,
-                                       completionHandler: completionHandler)
+                                       completionHandler: playbackCompletionHandler)
             
             if mustReschedule { mustReschedule = false }
             if wasPlaying { playerNode.play() }
@@ -148,7 +148,7 @@ open class AudioPlayer {
     }
     
     /// Called when the scheduled audio has been completely played.
-    open func commpletionHandler() {
+    open func playbackCompletionHandler() {
         DispatchQueue.main.async { [self] in
             segmentStartingFrame = 0
             
