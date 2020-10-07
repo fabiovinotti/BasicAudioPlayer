@@ -1,8 +1,8 @@
 //
 //  AudioPlayerDelegate.swift
-//  
+//  AudioElements
 //
-//  Created by Fabio Vinotti on 9/15/20.
+//  Copyright © 2020 Fabio Vinotti. All rights reserved.
 //
 
 import Foundation

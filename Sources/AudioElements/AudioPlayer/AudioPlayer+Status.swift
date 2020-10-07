@@ -1,8 +1,8 @@
 //
 //  AudioPlayer+Status.swift
-//  
+//  AudioElements
 //
-//  Created by Fabio Vinotti on 9/18/20.
+//  Copyright © 2020 Fabio Vinotti. All rights reserved.
 //
 
 import Foundation

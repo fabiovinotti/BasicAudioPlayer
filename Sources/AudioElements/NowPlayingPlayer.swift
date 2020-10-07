@@ -1,8 +1,8 @@
 //
 //  NowPlayingPlayer.swift
-//  
+//  AudioElements
 //
-//  Created by Fabio Vinotti on 9/21/20.
+//  Copyright © 2020 Fabio Vinotti. All rights reserved.
 //
 
 import AVFoundation
