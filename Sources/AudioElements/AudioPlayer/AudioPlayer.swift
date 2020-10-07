@@ -32,6 +32,10 @@ open class AudioPlayer {
         }
     }
     
+    public var format: AVAudioFormat {
+        audioFile.processingFormat
+    }
+    
     public var duration: TimeInterval {
         Double(audioFile.length) / audioFile.processingFormat.sampleRate
     }
