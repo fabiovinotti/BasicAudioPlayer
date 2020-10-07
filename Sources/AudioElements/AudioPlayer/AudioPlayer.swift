@@ -113,6 +113,9 @@ open class AudioPlayer {
     }
     
     open func pause() {
+        
+        guard status == .playing else { return }
+        
         playerNode.pause()
         engine.pause()
         engine.reset()
