@@ -71,7 +71,8 @@ open class AudioPlayer {
     
     public func load(url itemURL: URL) throws {
         
-        if status != .ready { stop() }
+        if status == .ready { playerNode.stop() }
+        else { stop() }
         
         audioFile = try AVAudioFile(forReading: itemURL)
         
