@@ -32,7 +32,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         set { timePitchNode.pitch = newValue }
     }
     
-    private let timePitchNode: AVAudioUnitTimePitch = .init()
+    public let timePitchNode: AVAudioUnitTimePitch = .init()
     
     private var audioSessionInterruptionSubscription: AnyCancellable?
     
