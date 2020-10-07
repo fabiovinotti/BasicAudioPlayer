@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-/// A base class to create audio players based on AVAudioEngine.
+/// A base class to create AVAudioEngine-based audio players.
 open class AudioPlayer {
     
     public private(set) var status: Status = .ready {
@@ -18,11 +18,13 @@ open class AudioPlayer {
     
     public var delegate: AudioPlayerDelegate?
     
+    /// The playback point as a number of audio frames.
     public var currentFrame: AVAudioFramePosition {
         get { playerNode.sampleTime + segmentStartingFrame }
         set { seek(to: newValue) }
     }
     
+    /// The playback point, in seconds, within the timeline of the sound associated with the player.
     open var currentTime: TimeInterval {
         get {
             Double(currentFrame) / audioFile.processingFormat.sampleRate
@@ -54,7 +56,7 @@ open class AudioPlayer {
     /// The starting frame of the scheduled segment of the audio file.
     private var segmentStartingFrame: AVAudioFramePosition = 0
     
-    /// If true the player must reschedule the AVAudioFile on playing.
+    /// Indicates whether the AudioPlayerNode needs to reschedule.
     private var mustReschedule: Bool = false
     
     public init(url itemURL: URL) throws {
@@ -85,15 +87,15 @@ open class AudioPlayer {
         engine.prepare()
     }
     
+    /// Attaches audio nodes to the player's audio engine.
     open func attachNodes() {
         engine.attach(playerNode)
     }
     
+    /// Connects the player's audio nodes.
     open func connectNodes() {
         engine.connect(playerNode, to: engine.mainMixerNode, format: audioFile.processingFormat)
     }
-    
-    //MARK: - Playback Control Functions
     
     open func play() {
         guard status != .playing else { return }

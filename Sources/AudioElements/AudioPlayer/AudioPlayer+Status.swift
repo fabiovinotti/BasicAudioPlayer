@@ -9,9 +9,10 @@ import Foundation
 
 extension AudioPlayer {
     
+    /// The operations a player might undertake.
     public enum Status {
         
-        /// Ready to start playing.
+        /// The player is stopped.
         case ready
         
         /// The player is playing.

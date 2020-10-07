@@ -36,8 +36,6 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
     
     private var audioSessionInterruptionSubscription: AnyCancellable?
     
-    //MARK: - Initializers
-    
     public override init(url itemURL: URL) throws {
         
         try super.init(url: itemURL)
@@ -55,7 +53,6 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         setNowPlayingInfo(from: item)
     }
     
-    //MARK: - Load new item
     public override func load(url itemURL: URL) throws {
         
         try super.load(url: itemURL)
@@ -70,9 +67,6 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         setNowPlayingInfo(from: item)
         setPlaybackInfo(playbackRate: 0.0, playbackTime: 0.0)
     }
-    
-    //MARK: - Playback control functions
-    
     
     open override func attachNodes() {
         engine.attach(playerNode)
@@ -104,8 +98,6 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         
         updateNowPlayingInfo(playbackRate: 0.0)
     }
-    
-    //MARK: - Audio Session Management
     
     open override func playbackCompletionHandler() {
         
@@ -177,8 +169,6 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
             shouldResume ? playerNode.play() : pause()
         }
     }
-    
-    //MARK: - Remote Commands Handling
     
     open var enabledRemoteCommands: [RemoteCommand : RemoteCommand.CommandHandler] {
         [

@@ -20,10 +20,10 @@ public class AudioPlayerNode: AVAudioPlayerNode {
         guard
             self.isPlaying,
             
-            /// Time in reference to engine start time. If engine is not running, returns nil.
+            /// Time in reference to engine start time.
             let nodeTime = self.lastRenderTime,
             
-            /// Converts nodeTime to time relative to the player start time. If player is not playing,  returns nil.
+            /// Converts nodeTime to time relative to the player start time.
             let playerTime = self.playerTime(forNodeTime: nodeTime)
         
         else { return sampleTimeBeforePause }
