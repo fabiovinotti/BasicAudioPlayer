@@ -12,8 +12,8 @@ public class AudioPlayerNode: AVAudioPlayerNode {
     /// A Boolean value that indicates wether or not the node has been stopped programmatically
     private var hasBeenStopped: Bool = false
     
-    /// The number of sample elapsed before pausing the audio player node.
-    private var lastFrameBeforePause: AVAudioFramePosition = 0
+    /// The playback time elapsed before pausing the audio player node, as a number of audio samples.
+    private var sampleTimeBeforePause: AVAudioFramePosition = 0
     
     /// The elapsed playback time as a number of audio samples.
     public var sampleTime: AVAudioFramePosition {
@@ -26,13 +26,13 @@ public class AudioPlayerNode: AVAudioPlayerNode {
             /// Converts nodeTime to time relative to the player start time. If player is not playing,  returns nil.
             let playerTime = self.playerTime(forNodeTime: nodeTime)
         
-        else { return lastFrameBeforePause }
+        else { return sampleTimeBeforePause }
         
         return playerTime.sampleTime
     }
     
     public override func pause() {
-        lastFrameBeforePause = sampleTime
+        sampleTimeBeforePause = sampleTime
         super.pause()
     }
     
@@ -40,7 +40,7 @@ public class AudioPlayerNode: AVAudioPlayerNode {
         hasBeenStopped = true
         super.stop()
         if isPlaying { pause() }
-        lastFrameBeforePause = 0
+        sampleTimeBeforePause = 0
     }
     
     public override func scheduleFile(_ file: AVAudioFile, at when: AVAudioTime?, completionHandler: AVAudioNodeCompletionHandler? = nil) {
@@ -69,7 +69,7 @@ public class AudioPlayerNode: AVAudioPlayerNode {
     private func completionHandler() {
         DispatchQueue.main.async { [unowned self] in
             if isPlaying { pause() }
-            lastFrameBeforePause = 0
+            sampleTimeBeforePause = 0
         }
     }
     
