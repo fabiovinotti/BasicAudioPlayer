@@ -36,24 +36,6 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
     
     private var audioSessionInterruptionSubscription: AnyCancellable?
     
-    open override func attachNodes() {
-        engine.attach(playerNode)
-        engine.attach(timePitchNode)
-    }
-    
-    open override func connectNodes() {
-        engine.connect(playerNode, to: timePitchNode, format: audioFile.processingFormat)
-        engine.connect(timePitchNode, to: engine.mainMixerNode, format: audioFile.processingFormat)
-    }
-    
-    open override func completionHandler() {
-        super.completionHandler()
-        
-        DispatchQueue.main.async {
-            self.updateNowPlayingInfo(playbackTime: Float(self.currentTime))
-        }
-    }
-    
     //MARK: - Initializers
     
     public override init(url itemURL: URL) throws {
@@ -91,6 +73,17 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
     
     //MARK: - Playback control functions
     
+    
+    open override func attachNodes() {
+        engine.attach(playerNode)
+        engine.attach(timePitchNode)
+    }
+    
+    open override func connectNodes() {
+        engine.connect(playerNode, to: timePitchNode, format: audioFile.processingFormat)
+        engine.connect(timePitchNode, to: engine.mainMixerNode, format: audioFile.processingFormat)
+    }
+    
     public override func play() {
         
         super.play()
@@ -113,6 +106,15 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
     }
     
     //MARK: - Audio Session Management
+    
+    open override func playbackCompletionHandler() {
+        
+        super.playbackCompletionHandler()
+        
+        DispatchQueue.main.async {
+            self.updateNowPlayingInfo(playbackTime: Float(self.currentTime))
+        }
+    }
     
     public func activateAudioSession() throws {
         
