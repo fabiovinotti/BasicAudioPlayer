@@ -123,6 +123,9 @@ open class AudioPlayer {
     }
     
     open func stop() {
+        
+        guard status != .ready else { return }
+        
         playerNode.stop()
         engine.stop()
         segmentStartingFrame = 0
