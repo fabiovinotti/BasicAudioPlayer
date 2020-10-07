@@ -19,7 +19,7 @@ open class AudioPlayer {
     public var delegate: AudioPlayerDelegate?
     
     public var currentFrame: AVAudioFramePosition {
-        get { playerNode.currentFrame + segmentStartingFrame }
+        get { playerNode.sampleTime + segmentStartingFrame }
         set { seek(to: newValue) }
     }
     

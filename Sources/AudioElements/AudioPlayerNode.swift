@@ -15,7 +15,8 @@ public class AudioPlayerNode: AVAudioPlayerNode {
     /// The number of sample elapsed before pausing the audio player node.
     private var lastFrameBeforePause: AVAudioFramePosition = 0
     
-    public var currentFrame: AVAudioFramePosition {
+    /// The elapsed playback time as a number of audio samples.
+    public var sampleTime: AVAudioFramePosition {
         guard
             self.isPlaying,
             
@@ -31,7 +32,7 @@ public class AudioPlayerNode: AVAudioPlayerNode {
     }
     
     public override func pause() {
-        lastFrameBeforePause = currentFrame
+        lastFrameBeforePause = sampleTime
         super.pause()
     }
     
