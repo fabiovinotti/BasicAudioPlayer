@@ -11,7 +11,7 @@ import AVFoundation
 open class AudioPlayer {
     
     public private(set) var status: Status = .ready {
-        didSet { delegate?.audioPlayerStatusChanged(self) }
+        didSet { delegate?.audioPlayer(self, statusChangedFrom: oldValue, to: status) }
     }
     
     public var loops: Bool = false

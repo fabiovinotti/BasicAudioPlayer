@@ -9,6 +9,6 @@ import Foundation
 
 public protocol AudioPlayerDelegate {
     
-    func audioPlayerStatusChanged(_ player: AudioPlayer)
+    func audioPlayer(_ player: AudioPlayer, statusChangedFrom oldStatus: AudioPlayer.Status, to newStatus: AudioPlayer.Status)
     
 }
