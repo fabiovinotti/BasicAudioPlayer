@@ -56,7 +56,10 @@ open class AudioPlayer {
     /// The starting frame of the scheduled segment of the audio file.
     private var segmentStartingFrame: AVAudioFramePosition = 0
     
-    /// Indicates whether the AudioPlayerNode needs to reschedule.
+    /// The playback time elapsed before pausing the audio player node, as a number of audio samples.
+    private var sampleTimeBeforePause: AVAudioFramePosition = 0
+    
+    /// Indicates whether the playerNode needs to reschedule.
     private var mustReschedule: Bool = false
     
     public init(url itemURL: URL) throws {
@@ -119,6 +122,7 @@ open class AudioPlayer {
         
         guard status == .playing else { return }
         
+        sampleTimeBeforePause = playerNode.sampleTime!
         playerNode.pause()
         engine.pause()
         engine.reset()
