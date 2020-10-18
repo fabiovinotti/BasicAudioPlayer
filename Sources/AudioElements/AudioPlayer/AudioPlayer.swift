@@ -168,7 +168,7 @@ open class AudioPlayer {
         else {
             segmentStartingFrame = max(0, frame)
             
-            let wasPlaying = playerNode.isPlaying
+            let wasPlaying = (status == .playing)
             
             playbackCompletionSubscription?.cancel()
             playerNode.stop()
