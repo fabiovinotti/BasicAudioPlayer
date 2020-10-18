@@ -20,7 +20,16 @@ open class AudioPlayer {
     
     /// The playback point as a number of audio frames.
     public var currentFrame: AVAudioFramePosition {
-        get { playerNode.sampleTime + segmentStartingFrame }
+        get {
+            switch status {
+            case .ready:
+                return 0
+            case .paused:
+                return segmentStartingFrame + sampleTimeBeforePause
+            case .playing:
+                return segmentStartingFrame + playerNode.sampleTime!
+            }
+        }
         set { seek(to: newValue) }
     }
     
@@ -51,7 +60,7 @@ open class AudioPlayer {
     
     public let engine: AVAudioEngine = .init()
     
-    public let playerNode: AudioPlayerNode = .init()
+    public let playerNode: AVAudioPlayerNode = .init()
     
     /// The starting frame of the scheduled segment of the audio file.
     private var segmentStartingFrame: AVAudioFramePosition = 0
