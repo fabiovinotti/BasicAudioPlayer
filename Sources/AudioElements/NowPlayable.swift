@@ -17,7 +17,7 @@ public protocol NowPlayable: class {
     func activateAudioSession() throws
     
     func deactivateAudioSession() throws
-
+    
 }
 
 // MARK: - Remote Commands Management
@@ -44,7 +44,7 @@ extension NowPlayable {
 
 //MARK: - Now Playing Info Management
 extension NowPlayable {
-        
+    
     /// Sets the now playing info extracted from a NowPlayableItem.
     public func setNowPlayingInfo(from item: NowPlayableItem) {
         
@@ -53,7 +53,7 @@ extension NowPlayable {
         info[MPMediaItemPropertyAssetURL] = item.assetURL
         info[MPMediaItemPropertyMediaType] = item.mediaType.rawValue
         info [MPNowPlayingInfoPropertyIsLiveStream] = item.isLiveStream
-                
+        
         if let title = item.title {
             info[MPMediaItemPropertyTitle] = title
         }
@@ -77,7 +77,7 @@ extension NowPlayable {
         if let duration = item.duration {
             info[MPMediaItemPropertyPlaybackDuration] = NSNumber(floatLiteral: duration)
         }
-
+        
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
     
