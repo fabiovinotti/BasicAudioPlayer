@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import Combine
 
 /// A base class to create AVAudioEngine-based audio players.
 open class AudioPlayer {
@@ -71,6 +72,8 @@ open class AudioPlayer {
     /// Indicates whether the playerNode needs to reschedule.
     private var mustReschedule: Bool = false
     
+    private var playbackCompletionSubscription: Cancellable?
+    
     public init(url itemURL: URL) throws {
         
         audioFile = try AVAudioFile(forReading: itemURL)
@@ -78,7 +81,9 @@ open class AudioPlayer {
         attachNodes()
         connectNodes()
         
-        playerNode.scheduleFile(audioFile, at: nil, completionHandler: playbackCompletionHandler)
+        playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: playbackCompletionHandler)
         
         engine.prepare()
     }
@@ -92,7 +97,9 @@ open class AudioPlayer {
         
         connectNodes()
         
-        playerNode.scheduleFile(audioFile, at: nil, completionHandler: playbackCompletionHandler)
+        playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: playbackCompletionHandler)
         
         if mustReschedule { mustReschedule = false }
         
@@ -120,7 +127,10 @@ open class AudioPlayer {
         if mustReschedule {
             mustReschedule = false
             playerNode.stop()
-            playerNode.scheduleFile(audioFile, at: nil, completionHandler: playbackCompletionHandler)
+            
+            playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveValue: playbackCompletionHandler)
         }
         
         playerNode.play()
@@ -142,6 +152,7 @@ open class AudioPlayer {
         
         guard status != .ready else { return }
         
+        playbackCompletionSubscription?.cancel()
         playerNode.stop()
         engine.stop()
         segmentStartingFrame = 0
@@ -159,13 +170,17 @@ open class AudioPlayer {
             
             let wasPlaying = playerNode.isPlaying
             
+            playbackCompletionSubscription?.cancel()
             playerNode.stop()
             
-            playerNode.scheduleSegment(audioFile,
-                                       startingFrame: segmentStartingFrame,
-                                       frameCount: AVAudioFrameCount(audioFile.length - segmentStartingFrame),
-                                       at: nil,
-                                       completionHandler: playbackCompletionHandler)
+            playbackCompletionSubscription = playerNode.scheduleSegmentPublisher(
+                audioFile,
+                startingFrame: segmentStartingFrame,
+                frameCount: AVAudioFrameCount(audioFile.length - segmentStartingFrame),
+                at: nil
+            )
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: playbackCompletionHandler)
             
             if mustReschedule { mustReschedule = false }
             if wasPlaying { playerNode.play() }
@@ -175,19 +190,22 @@ open class AudioPlayer {
     
     /// Called when the scheduled audio has been completely played.
     open func playbackCompletionHandler() {
-        DispatchQueue.main.async { [self] in
-            segmentStartingFrame = 0
+        
+        segmentStartingFrame = 0
+        
+        if loops {
+            playerNode.stop()
             
-            if loops {
-                playerNode.stop()
-                playerNode.scheduleFile(audioFile, at: nil, completionHandler: playbackCompletionHandler)
-                playerNode.play()
-            }
-            else {
-                mustReschedule = true
-                engine.stop()
-                status = .ready
-            }
+            playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveValue: playbackCompletionHandler)
+            
+            playerNode.play()
+        }
+        else {
+            mustReschedule = true
+            engine.stop()
+            status = .ready
         }
     }
 }
