@@ -103,9 +103,7 @@ open class NowPlayingPlayer: AudioPlayer, NowPlayable {
         
         super.playbackCompletionHandler()
         
-        DispatchQueue.main.async {
-            self.updateNowPlayingInfo(playbackTime: Float(self.currentTime))
-        }
+        updateNowPlayingInfo(playbackTime: Float(self.currentTime))
     }
     
     public func activateAudioSession() throws {
