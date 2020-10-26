@@ -166,6 +166,7 @@ open class AudioPlayer {
             loops ? seek(to: 0) : stop()
         }
         else {
+            sampleTimeBeforePause = 0
             segmentStartingFrame = max(0, frame)
             
             let wasPlaying = (status == .playing)
