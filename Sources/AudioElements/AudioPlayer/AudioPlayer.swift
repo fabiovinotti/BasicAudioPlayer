@@ -24,7 +24,7 @@ open class AudioPlayer {
         get {
             switch status {
             case .ready:
-                return 0
+                return segmentStartingFrame
             case .paused:
                 return segmentStartingFrame + sampleTimeBeforePause
             case .playing:
