@@ -128,12 +128,14 @@ open class AudioPlayer {
         }
         
         if mustReschedule {
-            mustReschedule = false
-            playerNode.stop()
+            segmentStartingFrame = 0
             
+            playerNode.stop()
             playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
                 .receive(on: DispatchQueue.main)
                 .sink(receiveValue: playbackCompletionHandler)
+            
+            mustReschedule = false
         }
         
         playerNode.play()
