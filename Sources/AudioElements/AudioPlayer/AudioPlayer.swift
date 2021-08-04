@@ -26,7 +26,7 @@ open class AudioPlayer {
             case .ready:
                 return segmentStartingFrame
             case .paused:
-                return segmentStartingFrame + sampleTimeBeforePause
+                return segmentStartingFrame + sampleTimeBeforeStop
             case .playing:
                 return segmentStartingFrame + playerNode.sampleTime!
             }
@@ -66,8 +66,8 @@ open class AudioPlayer {
     /// The starting frame of the scheduled segment of the audio file.
     private var segmentStartingFrame: AVAudioFramePosition = 0
     
-    /// The playback time elapsed before pausing the audio player node, as a number of audio samples.
-    private var sampleTimeBeforePause: AVAudioFramePosition = 0
+    /// The playback time elapsed before stopping the playback, as a number of audio samples.
+    private var sampleTimeBeforeStop: AVAudioFramePosition = 0
     
     /// Indicates whether the playerNode needs to reschedule.
     private var mustReschedule: Bool = false
@@ -141,7 +141,7 @@ open class AudioPlayer {
         
         guard status == .playing else { return }
         
-        sampleTimeBeforePause = playerNode.sampleTime!
+        sampleTimeBeforeStop = playerNode.sampleTime!
         playerNode.pause()
         engine.pause()
         engine.reset()
@@ -166,7 +166,7 @@ open class AudioPlayer {
             loops ? seek(to: 0) : stop()
         }
         else {
-            sampleTimeBeforePause = 0
+            sampleTimeBeforeStop = 0
             segmentStartingFrame = max(0, frame)
             
             let wasPlaying = (status == .playing)
