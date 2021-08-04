@@ -101,7 +101,10 @@ open class AudioPlayer {
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: playbackCompletionHandler)
         
-        if mustReschedule { mustReschedule = false }
+        segmentStartingFrame = 0
+        sampleTimeBeforeStop = 0
+        
+        mustReschedule = false
         
         engine.prepare()
     }
