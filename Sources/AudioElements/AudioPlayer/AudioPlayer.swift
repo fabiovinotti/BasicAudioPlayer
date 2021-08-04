@@ -153,9 +153,13 @@ open class AudioPlayer {
         guard status != .ready else { return }
         
         playbackCompletionSubscription?.cancel()
+        
+        if status == .playing {// If the player is already paused, there's no need to update sampleTimeBeforeStop.
+            sampleTimeBeforeStop = playerNode.sampleTime ?? 0
+        }
+        
         playerNode.stop()
         engine.stop()
-        segmentStartingFrame = 0
         mustReschedule = true
         status = .ready
     }
