@@ -90,8 +90,7 @@ open class AudioPlayer {
     
     public func load(url itemURL: URL) throws {
         
-        if status == .ready { playerNode.stop() }
-        else { stop() }
+        stop()
         
         audioFile = try AVAudioFile(forReading: itemURL)
         
@@ -154,8 +153,6 @@ open class AudioPlayer {
     }
     
     open func stop() {
-        
-        guard status != .ready else { return }
         
         playbackCompletionSubscription?.cancel()
         
