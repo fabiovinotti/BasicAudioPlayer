@@ -201,6 +201,7 @@ open class AudioPlayer {
             playerNode.play()
         }
         else {
+            sampleTimeBeforeStop = audioFile.length
             mustReschedule = true
             engine.stop()
             status = .ready
