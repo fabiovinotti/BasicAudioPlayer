@@ -191,7 +191,7 @@ open class AudioPlayer {
         
         segmentStartingFrame = 0
         
-        if loops {
+        if status == .playing && loops {
             playerNode.stop()
             
             playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
