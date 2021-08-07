@@ -21,16 +21,7 @@ open class AudioPlayer {
     
     /// The playback point as a number of audio frames.
     public var currentFrame: AVAudioFramePosition {
-        get {
-            switch status {
-            case .ready:
-                return segmentStartingFrame
-            case .paused:
-                return segmentStartingFrame + sampleTimeBeforeStop
-            case .playing:
-                return segmentStartingFrame + playerNode.sampleTime!
-            }
-        }
+        get { segmentStartingFrame + (playerNode.sampleTime ?? sampleTimeBeforeStop) }
         set { seek(to: newValue) }
     }
     
