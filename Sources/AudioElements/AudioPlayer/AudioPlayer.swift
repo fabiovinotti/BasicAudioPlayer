@@ -159,18 +159,15 @@ open class AudioPlayer {
     
     internal func seek(to frame: AVAudioFramePosition) {
         
-        if frame >= audioFile.length {
-            loops ? seek(to: 0) : stop()
-        }
-        else {
-            sampleTimeBeforeStop = 0
-            segmentStartingFrame = max(0, frame)
-            
-            let wasPlaying = (status == .playing)
-            
-            playbackCompletionSubscription?.cancel()
-            playerNode.stop()
-            
+        segmentStartingFrame = max(0, min(frame, audioFile.length))
+        sampleTimeBeforeStop = 0
+        
+        let wasPlaying = (status == .playing)
+        
+        playbackCompletionSubscription?.cancel()
+        playerNode.stop()
+        
+        if segmentStartingFrame < audioFile.length {
             playbackCompletionSubscription = playerNode.scheduleSegmentPublisher(
                 audioFile,
                 startingFrame: segmentStartingFrame,
@@ -180,10 +177,15 @@ open class AudioPlayer {
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: playbackCompletionHandler)
             
-            if mustReschedule { mustReschedule = false }
+            mustReschedule = false
+            
             if wasPlaying { playerNode.play() }
         }
-        
+        else {
+            engine.stop()
+            mustReschedule = true
+            status = .ready
+        }
     }
     
     /// Called when the scheduled audio has been completely played.
