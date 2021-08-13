@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import Combine
 
 /// A base class to create AVAudioEngine-based audio players.
 open class AudioPlayer {
@@ -21,7 +20,10 @@ open class AudioPlayer {
     
     /// The playback point as a number of audio frames.
     public var currentFrame: AVAudioFramePosition {
-        get { segmentStartingFrame + (playerNode.sampleTime ?? sampleTimeBeforeStop) }
+        get {
+            let cf = segmentStartingFrame + (playerNode.sampleTime ?? sampleTimeBeforeStop)
+            return min(cf, audioFile.length)
+        }
         set { seek(to: newValue) }
     }
     
@@ -63,8 +65,6 @@ open class AudioPlayer {
     /// Indicates whether the playerNode needs to reschedule.
     private var mustReschedule: Bool = false
     
-    private var playbackCompletionSubscription: Cancellable?
-    
     public init(url itemURL: URL) throws {
         
         audioFile = try AVAudioFile(forReading: itemURL)
@@ -72,9 +72,7 @@ open class AudioPlayer {
         attachNodes()
         connectNodes()
         
-        playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: playbackCompletionHandler)
+        playerNode.scheduleFile(audioFile, at: nil)
         
         engine.prepare()
     }
@@ -87,9 +85,7 @@ open class AudioPlayer {
         
         connectNodes()
         
-        playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: playbackCompletionHandler)
+        playerNode.scheduleFile(audioFile, at: nil)
         
         segmentStartingFrame = 0
         sampleTimeBeforeStop = 0
@@ -113,20 +109,24 @@ open class AudioPlayer {
         guard status != .playing else { return }
         
         if !engine.isRunning {
-            do { try engine.start() }
-            catch { print(error.localizedDescription) }
+            do {
+                try engine.start()
+            }
+            catch {
+                print(error.localizedDescription)
+            }
         }
         
         if mustReschedule {
             segmentStartingFrame = 0
             
             playerNode.stop()
-            playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
-                .receive(on: DispatchQueue.main)
-                .sink(receiveValue: playbackCompletionHandler)
+            playerNode.scheduleFile(audioFile, at: nil)
             
             mustReschedule = false
         }
+        
+        startPlaybackCompletionObserver()
         
         playerNode.play()
         status = .playing
@@ -145,8 +145,6 @@ open class AudioPlayer {
     
     open func stop() {
         
-        playbackCompletionSubscription?.cancel()
-        
         if status == .playing {// If the player is already paused, there's no need to update sampleTimeBeforeStop.
             sampleTimeBeforeStop = playerNode.sampleTime ?? 0
         }
@@ -164,18 +162,15 @@ open class AudioPlayer {
         
         let wasPlaying = (status == .playing)
         
-        playbackCompletionSubscription?.cancel()
         playerNode.stop()
         
         if segmentStartingFrame < audioFile.length {
-            playbackCompletionSubscription = playerNode.scheduleSegmentPublisher(
+            playerNode.scheduleSegment(
                 audioFile,
                 startingFrame: segmentStartingFrame,
                 frameCount: AVAudioFrameCount(audioFile.length - segmentStartingFrame),
                 at: nil
             )
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: playbackCompletionHandler)
             
             mustReschedule = false
             
@@ -188,6 +183,23 @@ open class AudioPlayer {
         }
     }
     
+    /// Calls the playback completion handler when the scheduled audio has been completely played.
+    private func startPlaybackCompletionObserver() {
+        
+        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
+            guard let self = self,
+                  self.status == .playing
+            else { return }
+            
+            if (self.currentFrame >= self.audioFile.length) {
+                self.playbackCompletionHandler()
+            }
+            
+            self.startPlaybackCompletionObserver()
+        }
+        .tolerance = 0.02
+    }
+    
     /// Called when the scheduled audio has been completely played.
     open func playbackCompletionHandler() {
         
@@ -196,9 +208,7 @@ open class AudioPlayer {
         if status == .playing && loops {
             playerNode.stop()
             
-            playbackCompletionSubscription = playerNode.scheduleFilePublisher(audioFile, at: nil)
-                .receive(on: DispatchQueue.main)
-                .sink(receiveValue: playbackCompletionHandler)
+            playerNode.scheduleFile(audioFile, at: nil)
             
             playerNode.play()
         }
