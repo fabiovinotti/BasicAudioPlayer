@@ -139,7 +139,6 @@ open class AudioPlayer {
         sampleTimeBeforeStop = playerNode.sampleTime!
         playerNode.pause()
         engine.pause()
-        engine.reset()
         status = .paused
     }
     
