@@ -1,5 +1,5 @@
 //
-//  AudioPlayer.swift
+//  BAPlayer.swift
 //  AudioElements
 //
 //  Copyright © 2020 Fabio Vinotti. All rights reserved.
@@ -8,7 +8,7 @@
 import AVFoundation
 
 /// A base class to create AVAudioEngine-based audio players.
-open class AudioPlayer {
+open class BAPlayer {
     
     public private(set) var status: Status = .ready {
         didSet { delegate?.audioPlayer(self, statusChangedFrom: oldValue, to: status) }
@@ -16,7 +16,7 @@ open class AudioPlayer {
     
     public var loops: Bool = false
     
-    public var delegate: AudioPlayerDelegate?
+    public var delegate: BAPlayerDelegate?
     
     /// The playback point as a number of audio frames.
     public var currentFrame: AVAudioFramePosition {

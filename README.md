@@ -1,11 +1,6 @@
-# AudioElements
+# BasicAudioPlayer
 
-AudioElements is an audio library for iOS.
-
-As of now, it can help you:
-
-* Easily create AVAudioEngine-based audio players
-* Provide Now Playing Info and register for Remote Command Center actions in a simplified way
+BasicAudioPlayer is an easy to customize AVAudioEngine-based player. It implements all the basic functions an audio player should have, so you can focus on adding AVAudioEngineNodes and custom features.
 
 ## License
 
