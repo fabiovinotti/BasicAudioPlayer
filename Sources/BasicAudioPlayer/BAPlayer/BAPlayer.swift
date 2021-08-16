@@ -77,7 +77,7 @@ open class BAPlayer {
         engine.prepare()
     }
     
-    public func load(url itemURL: URL) throws {
+    open func load(url itemURL: URL) throws {
         
         stop()
         
