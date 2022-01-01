@@ -154,7 +154,7 @@ open class BAPlayer {
     }
 }
 
-// MARK: - Playback Time Observer
+//MARK: - Playback Time Observation
 extension BAPlayer {
 
     //TODO: Observers should stop when the playback is stopped or paused, and resumed on play.
