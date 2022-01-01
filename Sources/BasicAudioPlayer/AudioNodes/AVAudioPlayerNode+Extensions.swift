@@ -10,37 +10,33 @@ import Combine
 
 extension AVAudioPlayerNode {
     
-    public func scheduleFilePublisher(_ file: AVAudioFile, at when: AVAudioTime?) -> AnyPublisher<Void, Never> {
-        
-        Future<Void, Never>({ promise in
-            self.scheduleFile(file, at: when, completionHandler: {
+    public func scheduleFile(_ file: AVAudioFile, at when: AVAudioTime?) -> AnyPublisher<Void, Never> {
+        Future<Void, Never> { promise in
+            self.scheduleFile(file, at: when) {
                 promise(.success(()))
-            })
-        })
+            }
+        }
         .eraseToAnyPublisher()
-        
     }
     
-    public func scheduleSegmentPublisher(_ file: AVAudioFile, startingFrame startFrame: AVAudioFramePosition, frameCount numberFrames: AVAudioFrameCount, at when: AVAudioTime?) -> AnyPublisher<Void, Never> {
+    public func scheduleSegment(_ file: AVAudioFile, startingFrame startFrame: AVAudioFramePosition, frameCount numberFrames: AVAudioFrameCount, at when: AVAudioTime?) -> AnyPublisher<Void, Never> {
         
-        Future<Void, Never>({ promise in
+        Future<Void, Never> { promise in
             self.scheduleSegment(file, startingFrame: startFrame, frameCount: numberFrames, at: when) {
                 promise(.success(()))
             }
-        })
+        }
         .eraseToAnyPublisher()
-        
     }
     
-    public func scheduleBufferPublisher(_ buffer: AVAudioPCMBuffer, at when: AVAudioTime?, options: AVAudioPlayerNodeBufferOptions = []) -> AnyPublisher<Void, Never> {
+    public func scheduleBuffer(_ buffer: AVAudioPCMBuffer, at when: AVAudioTime?, options: AVAudioPlayerNodeBufferOptions = []) -> AnyPublisher<Void, Never> {
         
-        Future<Void, Never>({ promise in
-            self.scheduleBuffer(buffer, at: when, options: options, completionHandler: {
+        Future<Void, Never> { promise in
+            self.scheduleBuffer(buffer, at: when, options: options) {
                 promise(.success(()))
-            })
-        })
+            }
+        }
         .eraseToAnyPublisher()
-        
     }
     
 }
