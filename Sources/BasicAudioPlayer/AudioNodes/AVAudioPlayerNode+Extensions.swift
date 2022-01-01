@@ -10,16 +10,6 @@ import Combine
 
 extension AVAudioPlayerNode {
     
-    /// The player time as a number of audio samples.
-    public var sampleTime: AVAudioFramePosition? {
-        
-        guard let nodeTime = lastRenderTime,
-              let playerTime = playerTime(forNodeTime: nodeTime)
-        else { return nil }
-        
-        return playerTime.sampleTime
-    }
-    
     public func scheduleFilePublisher(_ file: AVAudioFile, at when: AVAudioTime?) -> AnyPublisher<Void, Never> {
         
         Future<Void, Never>({ promise in
