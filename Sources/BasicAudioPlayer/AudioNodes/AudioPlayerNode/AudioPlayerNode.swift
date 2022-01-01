@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import Combine
 
 /// An AVAudioPlayerNode wrapper that encapsulates all basic playback control functionality.
 public class AudioPlayerNode {
@@ -20,6 +19,8 @@ public class AudioPlayerNode {
     public var duration: TimeInterval {
         file?.duration ?? 0
     }
+    
+    public var delegate: AudioPlayerNodeDelegate? = nil
     
     /// The underlying AVAudioPlayerNode.
     ///
@@ -73,24 +74,9 @@ public class AudioPlayerNode {
     
     public private(set) var status: Status = .noSource {
         didSet {
-            NotificationCenter.basicAudioPlayer
-                .post(name: Self.statusDidChangeNotification, object: self)
+            delegate?.playerNodeStatusDidChange(self, from: oldValue, to: status)
         }
     }
-    
-    /// Fires when the status of the player node changes.
-    public lazy var statusPublisher: AnyPublisher<Status, Never> = NotificationCenter
-        .Publisher(center: .basicAudioPlayer, name: Self.statusDidChangeNotification, object: self)
-        .map { n -> Status in
-            (n.object as? AudioPlayerNode)?.status ?? .noSource
-        }
-        .eraseToAnyPublisher()
-    
-    /// Fires when the scheduled audio data have been completely played.
-    public lazy var playbackCompletionPublisher: AnyPublisher<Void, Never> = NotificationCenter
-        .Publisher(center: .basicAudioPlayer, name: Self.playbackCompletionNotification, object: self)
-        .map {_ in return ()}
-        .eraseToAnyPublisher()
     
     public private(set) var file: AVAudioFile? = nil
     
@@ -260,10 +246,7 @@ public class AudioPlayerNode {
     /// Called when the scheduled audio has been completely played.
     private func playbackCompletionHandler() {
         stop()
-        
-        NotificationCenter.basicAudioPlayer
-            .post(name: Self.playbackCompletionNotification, object: self)
-        
+        delegate?.playerNodePlaybackDidComplete(self)
         if doesLoop { play() }
     }
 }

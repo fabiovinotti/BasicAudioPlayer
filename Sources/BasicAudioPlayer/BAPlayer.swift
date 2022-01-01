@@ -18,17 +18,13 @@ open class BAPlayer {
     }
     
     /// Publishes the new status when it changes.
-    ///
-    /// This publisher is simply the playerNode status publisher.
     public var statusPublisher: AnyPublisher<Status, Never> {
-        playerNode.statusPublisher
+        statusSubject.eraseToAnyPublisher()
     }
     
     /// Fires when the scheduled audio data have been completely played.
-    ///
-    /// This publisher is simply the playerNode completion publisher.
     public var playbackCompletionPublisher: AnyPublisher<Void, Never> {
-        playerNode.playbackCompletionPublisher
+        playbackCompletionSubject.eraseToAnyPublisher()
     }
     
     open var doesLoop: Bool {
@@ -73,13 +69,12 @@ open class BAPlayer {
     public let engine = AVAudioEngine()
     
     public let playerNode = AudioPlayerNode()
-        
-    private var playbackCompletionSubscription: AnyCancellable?
+    
+    private let statusSubject = PassthroughSubject<Status, Never>()
+    private let playbackCompletionSubject = PassthroughSubject<Void, Never>()
     
     public init() {
-        playbackCompletionSubscription = playerNode.playbackCompletionPublisher
-            .sink(receiveValue: playbackCompletionHandler)
-        
+        playerNode.delegate = self
         attachNodes()
     }
     
@@ -190,4 +185,17 @@ extension BAPlayer {
         }
     }
     
+}
+
+//MARK: - AudioPlayerNodeDelegate
+extension BAPlayer: AudioPlayerNodeDelegate {
+    
+    public func playerNodeStatusDidChange(_ node: AudioPlayerNode, from oldStatus: AudioPlayerNode.Status, to newStatus: AudioPlayerNode.Status) {
+        statusSubject.send(newStatus)
+    }
+    
+    public func playerNodePlaybackDidComplete(_ node: AudioPlayerNode) {
+        playbackCompletionHandler()
+        playbackCompletionSubject.send()
+    }
 }
