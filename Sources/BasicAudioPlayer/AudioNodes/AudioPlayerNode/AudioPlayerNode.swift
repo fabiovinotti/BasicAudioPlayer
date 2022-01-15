@@ -69,7 +69,7 @@ public class AudioPlayerNode {
             currentTime = segmentStart
         }
         
-        return max(0, min(currentTime, duration))
+        return min(currentTime, duration)
     }
     
     public private(set) var status: Status = .noSource {
