@@ -85,7 +85,9 @@ public class AudioPlayerNode {
     
     /// Indicates whether the playerNode needs to schedule before playing.
     private var needsScheduling: Bool = true
-        
+    
+    public init() {}
+    
     deinit {
         completionObserverTimer?.invalidate()
     }
