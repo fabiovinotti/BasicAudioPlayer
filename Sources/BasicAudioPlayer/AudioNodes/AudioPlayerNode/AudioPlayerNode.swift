@@ -20,7 +20,7 @@ public class AudioPlayerNode {
         file?.duration ?? 0
     }
     
-    public var delegate: AudioPlayerNodeDelegate? = nil
+    public weak var delegate: AudioPlayerNodeDelegate? = nil
     
     /// The underlying AVAudioPlayerNode.
     ///

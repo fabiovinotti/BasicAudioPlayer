@@ -8,7 +8,7 @@
 import Foundation
 
 /// A protocol that describes the methods to responds to playback events.
-public protocol AudioPlayerNodeDelegate {
+public protocol AudioPlayerNodeDelegate: AnyObject {
         
     func playerNodeStatusDidChange(_ node: AudioPlayerNode, from oldStatus: AudioPlayerNode.Status, to newStatus: AudioPlayerNode.Status)
     
