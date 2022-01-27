@@ -56,6 +56,12 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         self.init(file: f)
     }
     
+    deinit {
+        stop()
+        engine.disconnectNodeInput(playerNode.node)
+        engine.detachAll()
+    }
+    
     // MARK: - Audio File Loaders
     
     open func load(file: AVAudioFile) {
