@@ -2,7 +2,7 @@
 //  AudioPlayerNodeDelegate.swift
 //  
 //
-//  Created by Morena on 01/01/22.
+//  Created by Fabio Vinotti on 01/01/22.
 //
 
 import Foundation
