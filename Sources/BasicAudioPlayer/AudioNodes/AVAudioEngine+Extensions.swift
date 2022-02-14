@@ -13,9 +13,4 @@ extension AVAudioEngine {
         for n in nodes { attach(n) }
     }
     
-    public func detachAll() {
-        for n in attachedNodes {
-            detach(n)
-        }
-    }
 }
