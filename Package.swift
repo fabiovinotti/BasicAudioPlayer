@@ -24,6 +24,7 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "BasicAudioPlayerTests",
-            dependencies: ["BasicAudioPlayer"]),
+            dependencies: ["BasicAudioPlayer"],
+            resources: [.process("Resources")])
     ]
 )
