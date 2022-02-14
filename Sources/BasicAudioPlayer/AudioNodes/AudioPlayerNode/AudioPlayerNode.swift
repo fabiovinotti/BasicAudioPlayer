@@ -57,6 +57,8 @@ public class AudioPlayerNode {
     }
     
     /// The playback point within the timeline of the track associated with the player measured in seconds.
+    ///
+    /// The node has to be attached to an AVAudioEngine in order to return without raising errors.
     public var currentTime: TimeInterval {
         let currentTime: TimeInterval
         
