@@ -65,6 +65,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     // MARK: - Audio File Loaders
     
     open func load(file: AVAudioFile) {
+        stop()
         playerNode.load(file: file)
         connectNodes()
         playerNode.schedule(at: nil)
