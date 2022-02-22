@@ -125,13 +125,21 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     }
     
     open func pause() {
-        guard status == .playing else { return }
+        guard status == .playing else {
+            log("Attempt to pause playback failed because the player is not playing.", level: .info)
+            return
+        }
+        
         playerNode.pause()
         engine.pause()
     }
     
     open func stop() {
-        guard status == .playing || status == .paused else { return }
+        guard status == .playing || status == .paused else {
+            log("Attempt to stop playback failed because the player is already stopped.", level: .info)
+            return
+        }
+        
         playerNode.stop()
         engine.stop()
     }
