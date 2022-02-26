@@ -107,6 +107,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         // It is apparently harmless.
         // https://stackoverflow.com/questions/69206206/getting-throwing-10878-when-adding-a-source-to-a-mixer
         engine.connect(playerNode.node, to: engine.mainMixerNode, format: format)
+        engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
     }
     
     // MARK: - Playback Control
