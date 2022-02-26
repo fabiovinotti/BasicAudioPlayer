@@ -99,6 +99,10 @@ open class BAPlayer: AudioPlayerNodeDelegate {
             return
         }
         
+        // Disconnect nodes
+        engine.disconnectNodeInput(engine.mainMixerNode)
+        engine.disconnectNodeInput(engine.outputNode)
+        
         // Connecting to mainMixerNode causes the engine to throw -10878.
         // It is apparently harmless.
         // https://stackoverflow.com/questions/69206206/getting-throwing-10878-when-adding-a-source-to-a-mixer
