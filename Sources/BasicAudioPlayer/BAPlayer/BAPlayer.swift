@@ -58,8 +58,6 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     deinit {
         stop()
-        engine.disconnectNodeInput(playerNode.node)
-        engine.detach(playerNode.node)
     }
     
     // MARK: - Audio File Loaders
