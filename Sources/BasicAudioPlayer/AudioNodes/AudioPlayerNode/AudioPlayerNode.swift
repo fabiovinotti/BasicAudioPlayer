@@ -10,12 +10,12 @@ import AVFoundation
 /// An AVAudioPlayerNode wrapper that encapsulates all basic playback control functionality.
 public class AudioPlayerNode {
     
-    /// Wether the playback should restart once completed.
+    /// Whether the playback should restart once completed.
     public var doesLoop: Bool = false
     
     /// The time nedeed to play the entire audio source measured in seconds.
     ///
-    /// - returns: The duration when an audio source is available, 0 when it is not.
+    /// - returns: The playback duration of the loaded audio or 0 if no audio is loaded.
     public var duration: TimeInterval {
         file?.duration ?? 0
     }
@@ -58,7 +58,7 @@ public class AudioPlayerNode {
     
     /// The playback point within the timeline of the track associated with the player measured in seconds.
     ///
-    /// The node has to be attached to an AVAudioEngine in order to return without raising errors.
+    /// Calling this function when the underlying AVAudioPlayerNode is not attached to an engine will raise errors.
     public var currentTime: TimeInterval {
         let currentTime: TimeInterval
         
@@ -80,6 +80,7 @@ public class AudioPlayerNode {
         }
     }
     
+    /// The loaded audio file.
     public private(set) var file: AVAudioFile? = nil
     
     /// The playback time elapsed before pausing or stopping the node.
@@ -150,6 +151,7 @@ public class AudioPlayerNode {
         status = .paused
     }
     
+    /// Stops playback and removes any scheduled events.
     public func stop() {
         guard status == .playing || status == .paused else { return }
         timeElapsedBeforeStop = currentTime
@@ -196,9 +198,11 @@ public class AudioPlayerNode {
         needsScheduling = false
     }
     
-    /// Set the current time to the given time.
+    /// Sets the current playback time.
     ///
     /// The scheduled segment is modified when this function is called. It's new value will be time...duration.
+    ///
+    /// - parameter time: The time to which to seek.
     public func seek(to time: TimeInterval) {
         guard let f = file else {
             log("""
