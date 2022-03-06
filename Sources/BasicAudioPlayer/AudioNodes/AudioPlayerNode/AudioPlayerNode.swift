@@ -214,7 +214,11 @@ public class AudioPlayerNode {
         segmentEnd = f.duration
         
         if status == .playing {
-            !doesLoop && segmentStart == duration ? stop() : play()
+            stop()
+            
+            if segmentStart != duration || doesLoop {
+                play(at: nil)
+            }
         } else if status == .paused {
             stop()
         } else if status == .ready {
