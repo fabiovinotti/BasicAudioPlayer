@@ -132,13 +132,7 @@ public class AudioPlayerNode {
             return
         }
         
-        if needsScheduling {
-            if segmentStart == duration {
-                segmentStart = 0
-            }
-            
-            schedule(at: when)
-        }
+        if needsScheduling { schedule(at: when) }
         
         node.play()
         startCompletionObserver()
@@ -177,6 +171,8 @@ public class AudioPlayerNode {
         if let newSegment = segment {
             playbackSegment = newSegment
         }
+        
+        if segmentStart == duration { segmentStart = 0 }
         
         let startFrame = AVAudioFramePosition(segmentStart * file.fileFormat.sampleRate)
         let endFrame = AVAudioFramePosition(segmentEnd * file.fileFormat.sampleRate)
