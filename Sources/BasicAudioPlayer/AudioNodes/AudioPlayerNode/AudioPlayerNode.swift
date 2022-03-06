@@ -242,7 +242,7 @@ public class AudioPlayerNode {
         }
     }
     
-    /// The completion handler of the player node schedule function.
+    /// Executed when the scheduled audio has been completely played.
     @MainActor
     private func playbackCompletionHandler() {
         guard !blocksNextCompletionHandler else {
