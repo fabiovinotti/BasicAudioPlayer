@@ -97,11 +97,12 @@ public class AudioPlayerNode {
     /// Indicates whether the playerNode needs to schedule before playing.
     private var needsScheduling: Bool = true
     
-    public init() {}
+    /// Whether to block the next execution of the internal completion handler.
+    ///
+    /// This function is reset to false when a completion handler is actually blocked.
+    private var blocksNextCompletionHandler: Bool = false
     
-    deinit {
-        completionObserverTimer?.invalidate()
-    }
+    public init() {}
     
     public func load(url fileURL: URL) throws {
         let f = try AVAudioFile(forReading: fileURL)
@@ -162,9 +163,10 @@ public class AudioPlayerNode {
     /// Stops playback and removes any scheduled events.
     public func stop() {
         guard status == .playing || status == .paused else { return }
-        timeElapsedBeforeStop = currentTime
-        status = .ready
+        if status == .playing { timeElapsedBeforeStop = currentTime }
+        blocksNextCompletionHandler = true
         node.stop()
+        status = .ready
         needsScheduling = true
     }
     
@@ -201,8 +203,11 @@ public class AudioPlayerNode {
             startingFrame: startFrame,
             frameCount: frameCount,
             at: time,
-            completionCallbackType: .dataPlayedBack,
-            completionHandler: nil)
+            completionCallbackType: .dataPlayedBack) {_ in
+                Task { [weak self] in
+                    await self?.playbackCompletionHandler()
+                }
+            }
         
         node.prepare(withFrameCount: frameCount)
         needsScheduling = false
@@ -237,36 +242,17 @@ public class AudioPlayerNode {
         }
     }
     
-    private var completionObserverTimer: Timer?
-    /// Calls the playback completion handler when the scheduled audio has been completely played.
-    ///
-    /// It automatically stops checking when the playback stops.
-    private func startCompletionObserver() {
-        
-        func timerBlock(_ timer: Timer) {
-            guard status == .playing else {
-                timer.invalidate()
-                return
-            }
-            
-            if (currentTime >= segmentEnd) {
-                playbackCompletionHandler()
-            }
+    /// The completion handler of the player node schedule function.
+    @MainActor
+    private func playbackCompletionHandler() {
+        guard !blocksNextCompletionHandler else {
+            blocksNextCompletionHandler = false
+            return
         }
         
-        completionObserverTimer?.invalidate()
-        
-        completionObserverTimer = Timer.scheduledTimer(
-            withTimeInterval: 0.2,
-            repeats: true,
-            block: timerBlock)
-        
-        completionObserverTimer?.tolerance = 0.2
-    }
-    
-    /// Called when the scheduled audio has been completely played.
-    private func playbackCompletionHandler() {
-        stop()
+        node.stop()
+        status = .ready
+        needsScheduling = true
         delegate?.playerNodePlaybackDidComplete(self)
         if doesLoop { play() }
     }
