@@ -127,8 +127,9 @@ public class AudioPlayerNode {
             return
         }
         
-        if status == .playing {
-            stop()
+        guard status != .playing else {
+            log("The player is already playing.", level: .info)
+            return
         }
         
         if needsScheduling {
