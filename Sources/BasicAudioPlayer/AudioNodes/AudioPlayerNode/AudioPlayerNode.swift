@@ -62,8 +62,9 @@ public class AudioPlayerNode {
     public var currentTime: TimeInterval {
         let currentTime: TimeInterval
         
-        if let nodeTime = node.lastRenderTime, let playerTime = node.playerTime(forNodeTime: nodeTime) {
-            let playerTimeInterval = Double(playerTime.sampleTime) / playerTime.sampleRate
+        if let pt = node.playerTime {
+            let sampleTime = pt.sampleTime - (sampleTimeOffset ?? 0)
+            let playerTimeInterval = Double(sampleTime) / pt.sampleRate
             currentTime = segmentStart + playerTimeInterval
         } else if status == .paused {
             currentTime = timeElapsedBeforeStop
@@ -82,6 +83,13 @@ public class AudioPlayerNode {
     
     /// The loaded audio file.
     public private(set) var file: AVAudioFile? = nil
+    
+    /// The sample time offset.
+    ///
+    /// When AVAudioPlayerNode starts playing after a scheduling event its sample time is not 0 as expected.
+    /// This property is used to store the sample time offset, so that it can be used to correctly calculate
+    /// the current playback time.
+    private var sampleTimeOffset: AVAudioFramePosition? = nil
     
     /// The playback time elapsed before pausing or stopping the node.
     private var timeElapsedBeforeStop: TimeInterval = 0
@@ -135,7 +143,12 @@ public class AudioPlayerNode {
         if needsScheduling { schedule(at: when) }
         
         node.play()
-        startCompletionObserver()
+        
+        // Collect the offset of the sample time if it is nil.
+        if sampleTimeOffset == nil, let pt = node.playerTime {
+            sampleTimeOffset = pt.sampleTime
+        }
+        
         status = .playing
     }
     
@@ -193,6 +206,7 @@ public class AudioPlayerNode {
         
         node.prepare(withFrameCount: frameCount)
         needsScheduling = false
+        sampleTimeOffset = nil
     }
     
     /// Sets the current playback time.
