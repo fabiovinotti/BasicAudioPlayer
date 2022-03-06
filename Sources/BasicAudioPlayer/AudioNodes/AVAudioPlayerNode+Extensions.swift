@@ -10,6 +10,16 @@ import Combine
 
 extension AVAudioPlayerNode {
     
+    public var playerTime: AVAudioTime? {
+        var playerTime: AVAudioTime? = nil
+        
+        if let nodeTime = lastRenderTime {
+            playerTime = self.playerTime(forNodeTime: nodeTime)
+        }
+        
+        return playerTime
+    }
+    
     public func scheduleFile(_ file: AVAudioFile, at when: AVAudioTime?) -> AnyPublisher<Void, Never> {
         Future<Void, Never> { promise in
             self.scheduleFile(file, at: when) {
