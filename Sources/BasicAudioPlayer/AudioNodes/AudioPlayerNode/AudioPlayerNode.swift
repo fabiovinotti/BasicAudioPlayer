@@ -113,17 +113,17 @@ public class AudioPlayerNode {
     
     public func play(at when: AVAudioTime? = nil) {
         guard file != nil else {
-            log("An error occurred on play: no audio source to play.", level: .error)
+            log("No audio file to play. Load an audio file before calling play.", level: .error)
             return
         }
         
-        guard node.engine != nil else {
-            log("An error occurred on play: the node is not attached to an engine.", level: .error)
+        guard let e = node.engine else {
+            log("The node must be attached to an engine.", level: .error)
             return
         }
         
-        guard node.engine?.isRunning ?? false else {
-            log("An error occurred on play: the engine is not running.", level: .error)
+        guard e.isRunning else {
+            log("The audio engine is stopped. You must start the engine before calling play.", level: .error)
             return
         }
         
@@ -169,7 +169,7 @@ public class AudioPlayerNode {
     /// - parameter time: The time the segment plays.
     public func schedule(segment: ClosedRange<TimeInterval>? = nil, at time: AVAudioTime? = nil) {
         guard let file = file else {
-            log("An error occurred while scheduling: no audio source to play.", level: .error)
+            log("No audio file to schedule. Load an audio file before scheduling.", level: .error)
             return
         }
         
@@ -182,7 +182,7 @@ public class AudioPlayerNode {
         let frameCount = AVAudioFrameCount(endFrame - startFrame)
         
         guard frameCount > 0 else {
-            log("An error occurred while scheduling: frame count < 0.", level: .error)
+            log("The frame count is <= 0.", level: .error)
             return
         }
         
@@ -205,9 +205,7 @@ public class AudioPlayerNode {
     /// - parameter time: The time to which to seek.
     public func seek(to time: TimeInterval) {
         guard let f = file else {
-            log("""
-            An error occurred while setting the current time: No audio source has been provided. You need to provide an audio source (file) before setting the current time.
-            """, level: .error)
+            log("No audio file. Load an audio file before setting the current time.", level: .error)
             return
         }
         
