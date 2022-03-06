@@ -102,7 +102,7 @@ public class AudioPlayerNode {
     /// This function is reset to false when a completion handler is actually blocked.
     private var blocksNextCompletionHandler: Bool = false
     
-    public init() {}
+    public init() {} // Make the initializer accessible from any module that imports BasicAudioPlayer
     
     public func load(url fileURL: URL) throws {
         let f = try AVAudioFile(forReading: fileURL)
