@@ -8,14 +8,14 @@
 import Foundation
 import os
 
-fileprivate let generalLogger = Logger(subsystem: "BasicAudioPlayer", category: "general")
+fileprivate let moduleLogger = Logger(subsystem: "BasicAudioPlayer", category: "general")
 
-func log(_ message: String,
-         level: OSLogType = .default,
+func log(level: OSLogType,
+         _ message: String,
          file: String = #file,
          function: String = #function,
          line: Int = #line) {
     
     let fileName = (file as NSString).lastPathComponent
-    generalLogger.log(level: level, "\(fileName) : \(function) : \(line) -> \(message)")
+    moduleLogger.log(level: level, "\(fileName) : \(function) : \(line) -> \(message)")
 }

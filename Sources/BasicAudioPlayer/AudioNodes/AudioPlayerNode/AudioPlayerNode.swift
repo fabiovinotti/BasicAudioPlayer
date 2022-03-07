@@ -36,7 +36,8 @@ public class AudioPlayerNode {
             let end = max(0, min(newValue.upperBound, duration))
             
             guard start < end else {
-                log("An error occurred while setting the playback segment: segment start >= segment end.", level: .error)
+                log(level: .error,
+                    "An error occurred while setting the playback segment: segment start >= segment end.")
                 return
             }
             
@@ -122,22 +123,22 @@ public class AudioPlayerNode {
     
     public func play(at when: AVAudioTime? = nil) {
         guard file != nil else {
-            log("No audio file to play. Load an audio file before calling play.", level: .error)
+            log(level: .error, "No audio file to play. Load an audio file before calling play.")
             return
         }
         
         guard let e = node.engine else {
-            log("The node must be attached to an engine.", level: .error)
+            log(level: .error, "The node must be attached to an engine.")
             return
         }
         
         guard e.isRunning else {
-            log("The audio engine is stopped. You must start the engine before calling play.", level: .error)
+            log(level: .error, "The audio engine is stopped. You must start the engine before calling play.")
             return
         }
         
         guard status != .playing else {
-            log("The player is already playing.", level: .info)
+            log(level: .info, "The player is already playing.")
             return
         }
         
@@ -179,7 +180,7 @@ public class AudioPlayerNode {
     /// - parameter time: The time the segment plays.
     public func schedule(segment: ClosedRange<TimeInterval>? = nil, at time: AVAudioTime? = nil) {
         guard let file = file else {
-            log("No audio file to schedule. Load an audio file before scheduling.", level: .error)
+            log(level: .error, "No audio file to schedule. Load an audio file before scheduling.")
             return
         }
         
@@ -194,7 +195,7 @@ public class AudioPlayerNode {
         let frameCount = AVAudioFrameCount(endFrame - startFrame)
         
         guard frameCount > 0 else {
-            log("The frame count is <= 0.", level: .error)
+            log(level: .error, "The frame count is <= 0.")
             return
         }
         
@@ -221,7 +222,7 @@ public class AudioPlayerNode {
     /// - parameter time: The time to which to seek.
     public func seek(to time: TimeInterval) {
         guard let f = file else {
-            log("No audio file. Load an audio file before setting the current time.", level: .error)
+            log(level: .error, "No audio file. Load an audio file before setting the current time.")
             return
         }
         

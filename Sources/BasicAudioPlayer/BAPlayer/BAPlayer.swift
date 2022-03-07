@@ -93,7 +93,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     /// this function and implement the connections inside it.
     open func connectNodes() {
         guard let format = file?.processingFormat else {
-            log("An error occurred while connecting nodes: No audio file available", level: .error)
+            log(level: .error, "An error occurred while connecting nodes: No audio file available")
             return
         }
         
@@ -112,7 +112,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     open func play() {
         guard status != .noSource else {
-            log("An error occurred on play: no audio source has been loaded yet", level: .error)
+            log(level: .error, "An error occurred on play: no audio source has been loaded yet")
             return
         }
         
@@ -120,7 +120,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
             do {
                 try engine.start()
             } catch {
-                log("An error occurred on play: starting the engine failed with error: \(error.localizedDescription)", level: .error)
+                log(level: .error, "An error occurred on play: starting the engine failed with error: \(error.localizedDescription)")
             }
         }
         
@@ -129,7 +129,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     open func pause() {
         guard status == .playing else {
-            log("Attempt to pause playback failed because the player is not playing.", level: .info)
+            log(level: .info, "Attempt to pause playback failed because the player is not playing.")
             return
         }
         
@@ -139,7 +139,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     open func stop() {
         guard status == .playing || status == .paused else {
-            log("Attempt to stop playback failed because the player is already stopped.", level: .info)
+            log(level: .info, "Attempt to stop playback failed because the player is already stopped.")
             return
         }
         
