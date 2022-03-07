@@ -112,7 +112,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     open func play() {
         guard status != .noSource else {
-            log(level: .error, "An error occurred on play: no audio source has been loaded yet")
+            log(level: .error, "No audio file to play. Load an audio file before calling play.")
             return
         }
         
@@ -120,7 +120,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
             do {
                 try engine.start()
             } catch {
-                log(level: .error, "An error occurred on play: starting the engine failed with error: \(error.localizedDescription)")
+                log(level: .error, "Failed to start the engine: \(error.localizedDescription)")
             }
         }
         
@@ -129,7 +129,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     open func pause() {
         guard status == .playing else {
-            log(level: .info, "Attempt to pause playback failed because the player is not playing.")
+            log(level: .info, "The player is not playing.")
             return
         }
         
@@ -139,7 +139,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     open func stop() {
         guard status == .playing || status == .paused else {
-            log(level: .info, "Attempt to stop playback failed because the player is already stopped.")
+            log(level: .info, "The player is already stopped.")
             return
         }
         

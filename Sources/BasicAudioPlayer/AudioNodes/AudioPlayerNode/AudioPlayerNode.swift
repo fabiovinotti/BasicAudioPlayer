@@ -37,7 +37,7 @@ public class AudioPlayerNode {
             
             guard start < end else {
                 log(level: .error,
-                    "An error occurred while setting the playback segment: segment start >= segment end.")
+                    "Segment start >= segment end.")
                 return
             }
             
@@ -133,7 +133,7 @@ public class AudioPlayerNode {
         }
         
         guard e.isRunning else {
-            log(level: .error, "The audio engine is stopped. You must start the engine before calling play.")
+            log(level: .error, "The audio engine is stopped. Start the engine before calling play.")
             return
         }
         
