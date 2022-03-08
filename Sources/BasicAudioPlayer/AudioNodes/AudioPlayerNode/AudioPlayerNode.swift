@@ -166,8 +166,13 @@ public class AudioPlayerNode {
     
     /// Stops playback and removes any scheduled events.
     public func stop() {
-        guard status == .playing || status == .paused else { return }
-        if status == .playing { timeElapsedBeforeStop = currentTime }
+        guard status != .noSource else { return }
+        
+        if status == .ready && needsScheduling {
+            log(level: .info, "Calling stop() had no effect: the player is already stopped and there are no scheduled events.")
+            return
+        }
+        
         blocksNextCompletionHandler = true
         node.stop()
         status = .ready
