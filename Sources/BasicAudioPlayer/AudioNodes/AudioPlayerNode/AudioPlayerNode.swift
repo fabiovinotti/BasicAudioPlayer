@@ -96,7 +96,7 @@ public class AudioPlayerNode {
     private var timeElapsedBeforeStop: TimeInterval = 0
     
     /// Indicates whether the playerNode needs to schedule before playing.
-    private var needsScheduling: Bool = true
+    public private(set) var needsScheduling: Bool = true
     
     /// Whether to block the next execution of the internal completion handler.
     ///
