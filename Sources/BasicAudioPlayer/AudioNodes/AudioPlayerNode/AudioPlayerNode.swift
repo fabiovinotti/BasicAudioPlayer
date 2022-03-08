@@ -95,7 +95,10 @@ public class AudioPlayerNode {
     /// The playback time elapsed before pausing or stopping the node.
     private var timeElapsedBeforeStop: TimeInterval = 0
     
-    /// Indicates whether the playerNode needs to schedule before playing.
+    /// Whether the scheduling of an audio file segment is required.
+    ///
+    /// If an audio file is loaded and the conditions for playback are met,
+    /// the scheduling is performed automatically before starting playback.
     public private(set) var needsScheduling: Bool = true
     
     /// Whether to block the next execution of the internal completion handler.
@@ -171,10 +174,13 @@ public class AudioPlayerNode {
         needsScheduling = true
     }
     
-    /// Schedules the playing of an audio file segment.
+    /// Schedules the playing of a segment of the loaded audio file.
     ///
-    /// The node's file will be used as an audio source. If no segment is provided when this class is called,
-    /// the segmentStart and segmentEnd properties of the node will be used instead.
+    /// If an audio file is loaded and the conditions for playback are met,
+    /// the scheduling is performed automatically before starting playback.
+    /// However, you can schedule a segment manually using this function.
+    ///
+    /// When no segment is specified on call, the segmentStart and segmentEnd properties are used instead.
     ///
     /// - parameter segment: A range indicating the segment starting and ending time.
     /// - parameter time: The time the segment plays.
