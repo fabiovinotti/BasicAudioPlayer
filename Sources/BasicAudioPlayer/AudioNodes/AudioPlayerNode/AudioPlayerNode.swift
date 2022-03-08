@@ -248,7 +248,8 @@ public class AudioPlayerNode {
             }
         } else if status == .paused {
             stop()
-        } else if status == .ready {
+        } else if status == .ready && !needsScheduling {
+            blocksNextCompletionHandler = true
             node.stop()
             needsScheduling = true
         }
