@@ -1,8 +1,9 @@
 //
+//  BasicAudioPlayer
 //  AudioPlayerNodeTests.swift
-//  BasicAudioPlayerTests
 //
-//  Created by Fabio Vinotti on 12/02/22.
+//  Copyright © 2022 Fabio Vinotti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import XCTest

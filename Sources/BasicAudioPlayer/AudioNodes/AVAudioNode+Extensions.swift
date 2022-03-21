@@ -1,8 +1,9 @@
 //
+//  BasicAudioPlayer
 //  AVAudioNode+Extensions.swift
-//  
 //
-//  Created by Fabio Vinotti on 23/12/21.
+//  Copyright © 2022 Fabio Vinotti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import AVFAudio

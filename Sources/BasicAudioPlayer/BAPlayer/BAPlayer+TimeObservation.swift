@@ -1,8 +1,9 @@
 //
+//  BasicAudioPlayer
 //  BAPlayer+TimeObservation.swift
-//  
 //
-//  Created by Fabio Vinotti on 15/01/22.
+//  Copyright © 2022 Fabio Vinotti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import Foundation
