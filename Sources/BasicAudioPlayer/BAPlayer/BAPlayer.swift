@@ -53,6 +53,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         load(file: file)
     }
     
+    /// Creates a player and load the file at the specified URL.
     public convenience init(url fileURL: URL) throws {
         let f = try AVAudioFile(forReading: fileURL)
         self.init(file: f)
