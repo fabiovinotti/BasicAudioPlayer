@@ -114,7 +114,11 @@ public class AudioPlayerNode {
     /// This function is reset to false when a completion handler is actually blocked.
     private var blocksNextCompletionHandler: Bool = false
     
+    // MARK: - Creating a Player Node
+    
     public init() {} // Make the initializer accessible from any module that imports BasicAudioPlayer
+    
+    // MARK: - Loading Audio Files
     
     public func load(url fileURL: URL) throws {
         let f = try AVAudioFile(forReading: fileURL)
@@ -131,6 +135,8 @@ public class AudioPlayerNode {
         playbackSegment = 0...duration
         status = .ready
     }
+    
+    // MARK: - Scheduling
     
     /// Schedules the playing of a segment of the loaded audio file.
     ///
@@ -178,6 +184,8 @@ public class AudioPlayerNode {
         needsScheduling = false
         sampleTimeOffset = nil
     }
+    
+    // MARK: - Controlling Playback
     
     public func play(at when: AVAudioTime? = nil) {
         guard file != nil else {
