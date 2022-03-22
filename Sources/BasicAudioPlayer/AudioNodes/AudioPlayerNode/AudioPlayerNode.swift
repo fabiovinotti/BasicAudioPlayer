@@ -14,9 +14,9 @@ public class AudioPlayerNode {
     /// Whether the playback should restart once completed.
     public var doesLoop: Bool = false
     
-    /// The time nedeed to play the entire audio source measured in seconds.
+    /// The number of seconds required to completely play the loaded audio file.
     ///
-    /// - returns: The playback duration of the loaded audio or 0 if no audio is loaded.
+    /// - returns: The total playback duration of the loaded audio file or 0 if no file has been loaded yet.
     public var duration: TimeInterval {
         file?.duration ?? 0
     }
