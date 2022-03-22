@@ -12,9 +12,12 @@ extension AVAudioNode {
     
     /// Detaches the audio node from its audio engine.
     public func detach() {
-        if let e = engine {
-            e.detach(self)
+        guard let engine = engine else {
+            log(level: .error, "The source audio node is not attached to an engine.")
+            return
         }
+        
+        engine.detach(self)
     }
     
 }
