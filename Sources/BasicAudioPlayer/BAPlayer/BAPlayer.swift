@@ -30,12 +30,12 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         playerNode.duration
     }
     
-    open var doesLoop: Bool {
+    public var doesLoop: Bool {
         get { playerNode.doesLoop }
         set { playerNode.doesLoop = newValue }
     }
     
-    open var currentTime: TimeInterval {
+    public var currentTime: TimeInterval {
         get { playerNode.currentTime }
         set { playerNode.seek(to: newValue) }
     }
@@ -63,7 +63,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     // MARK: - Audio File Loaders
     
-    open func load(file: AVAudioFile) {
+    public func load(file: AVAudioFile) {
         stop()
         playerNode.load(file: file)
         connectNodes()
@@ -111,7 +111,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     // MARK: - Controlling Playback
     
-    open func play() {
+    public func play() {
         guard status != .noSource else {
             log(level: .error, "No audio file to play. Load an audio file before calling play.")
             return
@@ -128,7 +128,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         playerNode.play()
     }
     
-    open func pause() {
+    public func pause() {
         guard status == .playing else {
             log(level: .info, "The player is not playing.")
             return
@@ -138,7 +138,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         engine.pause()
     }
     
-    open func stop() {
+    public func stop() {
         guard status == .playing || status == .paused else {
             log(level: .info, "The player is already stopped.")
             return
@@ -150,13 +150,11 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     // MARK: - AudioPlayerNodeDelegate
     
-    /// Called by the playerNode when its status changes.
-    ///
-    /// Override this function in order to react to a status change.
-    open func playerNodeStatusDidChange(_ node: AudioPlayerNode, from oldStatus: AudioPlayerNode.Status, to newStatus: AudioPlayerNode.Status) {}
+    public func playerNodeStatusDidChange(_ node: AudioPlayerNode,
+                                          from oldStatus: AudioPlayerNode.Status,
+                                          to newStatus: AudioPlayerNode.Status) {}
     
-    /// Called by the playerNode when the playback is completed.
-    open func playerNodePlaybackDidComplete(_ node: AudioPlayerNode) {
+    public func playerNodePlaybackDidComplete(_ node: AudioPlayerNode) {
         playerNode.segmentStart = 0
         playerNode.segmentEnd = playerNode.duration
         
