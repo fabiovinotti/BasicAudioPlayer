@@ -109,7 +109,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
     }
     
-    // MARK: - Playback Control
+    // MARK: - Controlling Playback
     
     open func play() {
         guard status != .noSource else {
