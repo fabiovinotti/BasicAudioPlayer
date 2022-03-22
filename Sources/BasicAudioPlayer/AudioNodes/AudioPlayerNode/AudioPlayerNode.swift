@@ -45,8 +45,7 @@ public class AudioPlayerNode {
             let end = max(0, min(newValue.upperBound, duration))
             
             guard start < end else {
-                log(level: .error,
-                    "Segment start >= segment end.")
+                log(level: .error, "Segment start >= segment end.")
                 return
             }
             
