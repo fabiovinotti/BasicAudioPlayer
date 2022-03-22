@@ -61,7 +61,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         stop()
     }
     
-    // MARK: - Audio File Loaders
+    // MARK: - Loading Audio Files
     
     public func load(file: AVAudioFile) {
         stop()
