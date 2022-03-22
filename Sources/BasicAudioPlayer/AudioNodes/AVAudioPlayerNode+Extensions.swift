@@ -1,8 +1,9 @@
 //
+//  BasicAudioPlayer
 //  AVAudioPlayerNode+Extensions.swift
-//  
 //
-//  Copyright © 2020 Fabio Vinotti. All rights reserved.
+//  Copyright © 2022 Fabio Vinotti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import AVFoundation
