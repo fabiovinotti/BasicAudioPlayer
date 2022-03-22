@@ -47,6 +47,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         attachNodes()
     }
     
+    /// Creates a player and load the specified file.
     public convenience init(file: AVAudioFile) {
         self.init()
         load(file: file)
