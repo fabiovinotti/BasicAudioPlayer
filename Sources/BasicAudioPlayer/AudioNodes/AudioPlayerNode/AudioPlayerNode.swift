@@ -36,6 +36,18 @@ public class AudioPlayerNode {
         set { node.volume = newValue }
     }
     
+    /// The playback segment's lower bound.
+    public var segmentStart: TimeInterval {
+        get { _playbackSegment.lowerBound }
+        set { playbackSegment = newValue...segmentEnd }
+    }
+    
+    /// The playback segment's upper bound.
+    public var segmentEnd: TimeInterval {
+        get { _playbackSegment.upperBound }
+        set { playbackSegment = segmentStart...newValue }
+    }
+    
     private var _playbackSegment: ClosedRange<TimeInterval> = 0...0
     /// The portion of the audio source that will be scheduled.
     public var playbackSegment: ClosedRange<TimeInterval> {
@@ -51,18 +63,6 @@ public class AudioPlayerNode {
             
             _playbackSegment = start...end
         }
-    }
-    
-    /// The playback segment's lower bound.
-    public var segmentStart: TimeInterval {
-        get { _playbackSegment.lowerBound }
-        set { playbackSegment = newValue...segmentEnd }
-    }
-    
-    /// The playback segment's upper bound.
-    public var segmentEnd: TimeInterval {
-        get { _playbackSegment.upperBound }
-        set { playbackSegment = segmentStart...newValue }
     }
     
     /// The playback point within the timeline of the track associated with the player measured in seconds.
@@ -132,61 +132,6 @@ public class AudioPlayerNode {
         status = .ready
     }
     
-    public func play(at when: AVAudioTime? = nil) {
-        guard file != nil else {
-            log(level: .error, "No audio file to play. Load an audio file before calling play.")
-            return
-        }
-        
-        guard let e = node.engine else {
-            log(level: .error, "The node must be attached to an engine.")
-            return
-        }
-        
-        guard e.isRunning else {
-            log(level: .error, "The audio engine is stopped. Start the engine before calling play.")
-            return
-        }
-        
-        guard status != .playing else {
-            log(level: .info, "The player is already playing.")
-            return
-        }
-        
-        if needsScheduling { schedule(at: when) }
-        
-        node.play()
-        
-        // Collect the offset of the sample time if it is nil.
-        if sampleTimeOffset == nil, let pt = node.playerTime {
-            sampleTimeOffset = pt.sampleTime
-        }
-        
-        status = .playing
-    }
-    
-    public func pause() {
-        guard status == .playing else { return }
-        timeElapsedBeforeStop = currentTime
-        node.pause()
-        status = .paused
-    }
-    
-    /// Stops playback and removes any scheduled events.
-    public func stop() {
-        guard status != .noSource else { return }
-        
-        if status == .ready && needsScheduling {
-            log(level: .info, "Calling stop() had no effect: the player is already stopped and there are no scheduled events.")
-            return
-        }
-        
-        blocksNextCompletionHandler = true
-        node.stop()
-        status = .ready
-        needsScheduling = true
-    }
-    
     /// Schedules the playing of a segment of the loaded audio file.
     ///
     /// If an audio file is loaded and the conditions for playback are met,
@@ -232,6 +177,62 @@ public class AudioPlayerNode {
         node.prepare(withFrameCount: frameCount)
         needsScheduling = false
         sampleTimeOffset = nil
+    }
+    
+    public func play(at when: AVAudioTime? = nil) {
+        guard file != nil else {
+            log(level: .error, "No audio file to play. Load an audio file before calling play.")
+            return
+        }
+        
+        guard let e = node.engine else {
+            log(level: .error, "The node must be attached to an engine.")
+            return
+        }
+        
+        guard e.isRunning else {
+            log(level: .error, "The audio engine is stopped. Start the engine before calling play.")
+            return
+        }
+        
+        guard status != .playing else {
+            log(level: .info, "The player is already playing.")
+            return
+        }
+        
+        if needsScheduling { schedule(at: when) }
+        
+        node.play()
+        
+        // Collect the offset of the sample time if it is nil.
+        if sampleTimeOffset == nil, let pt = node.playerTime {
+            sampleTimeOffset = pt.sampleTime
+        }
+        
+        status = .playing
+    }
+    
+    public func pause() {
+        guard status == .playing else { return }
+        timeElapsedBeforeStop = currentTime
+        node.pause()
+        status = .paused
+    }
+    
+    /// Stops playback and removes any scheduled events.
+    public func stop() {
+        guard status != .noSource else { return }
+        
+        if status == .ready && needsScheduling {
+            log(level: .info, "Calling stop() had no effect: " +
+                "the player is already stopped and there are no scheduled events.")
+            return
+        }
+        
+        blocksNextCompletionHandler = true
+        node.stop()
+        status = .ready
+        needsScheduling = true
     }
     
     /// Sets the current playback time.
