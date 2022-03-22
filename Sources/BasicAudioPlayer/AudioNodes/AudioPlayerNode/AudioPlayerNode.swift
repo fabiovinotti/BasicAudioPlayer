@@ -28,6 +28,14 @@ public class AudioPlayerNode {
     /// Interacting with it directly could cause the wrapper to behave unpredictably.
     public private(set) var node = AVAudioPlayerNode()
     
+    /// The bus’s input volume.
+    ///
+    /// The range of valid values is 0.0 to 1.0
+    public var volume: Float {
+        get { node.volume }
+        set { node.volume = newValue }
+    }
+    
     private var _playbackSegment: ClosedRange<TimeInterval> = 0...0
     /// The portion of the audio source that will be scheduled.
     public var playbackSegment: ClosedRange<TimeInterval> {
