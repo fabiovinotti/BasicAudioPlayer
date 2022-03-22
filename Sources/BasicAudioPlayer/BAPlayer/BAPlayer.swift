@@ -17,8 +17,8 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     public let playerNode = AudioPlayerNode()
     
     public typealias Status = AudioPlayerNode.Status
-    /// The status of the underlying player node. It provides information about the playback status.
-    public var status: Status {
+    /// The status of the underlying audio player node. It provides information about the playback status.
+    public var status: AudioPlayerNode.Status {
         playerNode.status
     }
     
