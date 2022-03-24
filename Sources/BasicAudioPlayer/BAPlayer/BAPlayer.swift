@@ -26,6 +26,11 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         playerNode.file
     }
     
+    public var currentTime: TimeInterval {
+        get { playerNode.currentTime }
+        set { playerNode.seek(to: newValue) }
+    }
+    
     public var duration: TimeInterval {
         playerNode.duration
     }
@@ -35,16 +40,12 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         set { playerNode.doesLoop = newValue }
     }
     
-    public var currentTime: TimeInterval {
-        get { playerNode.currentTime }
-        set { playerNode.seek(to: newValue) }
-    }
-    
     // MARK: - Initializers
     
-    public init() {
-        playerNode.delegate = self
-        attachNodes()
+    /// Creates a player and load the file at the specified URL.
+    public convenience init(url fileURL: URL) throws {
+        let f = try AVAudioFile(forReading: fileURL)
+        self.init(file: f)
     }
     
     /// Creates a player and load the specified file.
@@ -53,10 +54,9 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         load(file: file)
     }
     
-    /// Creates a player and load the file at the specified URL.
-    public convenience init(url fileURL: URL) throws {
-        let f = try AVAudioFile(forReading: fileURL)
-        self.init(file: f)
+    public init() {
+        playerNode.delegate = self
+        attachNodes()
     }
     
     deinit {
@@ -65,17 +65,17 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     // MARK: - Loading Audio Files
     
+    public func load(url fileURL: URL) throws {
+        let f = try AVAudioFile(forReading: fileURL)
+        load(file: f)
+    }
+    
     public func load(file: AVAudioFile) {
         stop()
         playerNode.load(file: file)
         connectNodes()
         playerNode.schedule(at: nil)
         engine.prepare()
-    }
-    
-    public func load(url fileURL: URL) throws {
-        let f = try AVAudioFile(forReading: fileURL)
-        load(file: f)
     }
     
     // MARK: - Nodes Management
