@@ -11,6 +11,8 @@ import AVFoundation
 /// An AVAudioPlayerNode wrapper that encapsulates all basic playback control functionality.
 public class AudioPlayerNode {
     
+    // MARK: - Properties
+    
     /// Whether the playback should restart once completed.
     public var doesLoop: Bool = false
     
