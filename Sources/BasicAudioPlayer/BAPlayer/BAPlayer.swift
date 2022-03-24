@@ -40,6 +40,13 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         set { playerNode.doesLoop = newValue }
     }
     
+    /// All audio units added to the player.
+    ///
+    /// The order of the audio units in this array reflects the connection order.
+    /// The source node of the first unit is the player node, the destination node
+    /// of the last unit is the engine's main mixer node.
+    public private(set) var audioUnits: [AVAudioUnit] = .init()
+    
     // MARK: - Initializers
     
     /// Creates a player and load the file at the specified URL.
@@ -56,7 +63,7 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     
     public init() {
         playerNode.delegate = self
-        attachNodes()
+        engine.attach(playerNode.node)
     }
     
     deinit {
@@ -73,42 +80,9 @@ open class BAPlayer: AudioPlayerNodeDelegate {
     public func load(file: AVAudioFile) {
         stop()
         playerNode.load(file: file)
-        connectNodes()
+        redoConnections()
         playerNode.schedule(at: nil)
         engine.prepare()
-    }
-    
-    // MARK: - Nodes Management
-    
-    /// Attaches the audio nodes to the engine.
-    ///
-    /// This method is called automatically when the nodes need to be attached to the engine.
-    /// If your subclass adds new nodes that must be attached to its engine, override
-    /// this function to include the code necessary to attach the nodes.
-    open func attachNodes() {
-        engine.attach(playerNode.node)
-    }
-    
-    /// Connects the audio nodes to the engine.
-    ///
-    /// This method is called automatically when the nodes need to be connected.
-    /// If your subclass adds new nodes that must be connected, override
-    /// this function and implement the connections inside it.
-    open func connectNodes() {
-        guard let format = file?.processingFormat else {
-            log(level: .error, "An error occurred while connecting nodes: No audio file available")
-            return
-        }
-        
-        // Disconnect nodes
-        engine.disconnectNodeInput(engine.mainMixerNode)
-        engine.disconnectNodeInput(engine.outputNode)
-        
-        // Connecting to mainMixerNode causes the engine to throw -10878.
-        // It is apparently harmless.
-        // https://stackoverflow.com/questions/69206206/getting-throwing-10878-when-adding-a-source-to-a-mixer
-        engine.connect(playerNode.node, to: engine.mainMixerNode, format: format)
-        engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
     }
     
     // MARK: - Controlling Playback
@@ -148,6 +122,93 @@ open class BAPlayer: AudioPlayerNodeDelegate {
         
         playerNode.stop()
         engine.stop()
+    }
+    
+    // MARK: - Managing Audio Units
+    
+    /// Add an audio unit to the player.
+    ///
+    /// The unit will be placed at the end of the audio unit chain.
+    public func addAudioUnit(_ unit: AVAudioUnit) {
+        if status == .playing || status == .paused {
+            stop()
+        }
+        
+        audioUnits.append(unit)
+        engine.attach(unit)
+        
+        guard let format = file?.processingFormat else {
+            // Nodes are connected when a file is loaded.
+            // If no file has been loaded yet, there is no
+            // point in connecting the new audio unit.
+            return
+        }
+        
+        let mixer = engine.mainMixerNode
+        
+        guard let inputConnection = engine.inputConnectionPoint(for: mixer, inputBus: 0) else {
+            log(level: .error, "Nodes don't appear to be connected even if a file has been loaded.")
+            redoConnections() // Try to correct connections.
+            return
+        }
+        
+        guard let inputNode = inputConnection.node,
+              inputNode !== unit // Node is already connected to mixer.
+        else { return }
+        
+        engine.disconnectNodeInput(mixer, bus: 0)
+        engine.connect(inputNode, to: unit, fromBus: inputConnection.bus, toBus: 0, format: format)
+        engine.connect(unit, to: mixer, format: format)
+    }
+    
+    // MARK: - Managing Connections
+    
+    /// Disconnects all audio nodes and then connects them.
+    private func redoConnections() {
+        disconnectNodes()
+        connectNodes()
+    }
+    
+    /// Removes all connections.
+    ///
+    /// BAPlayer calls this method when all nodes need to be disconnected.
+    private func disconnectNodes() {
+        engine.disconnectNodeInput(engine.outputNode)
+        engine.disconnectNodeInput(engine.mainMixerNode)
+        
+        for node in audioUnits {
+            engine.disconnectNodeInput(node)
+        }
+    }
+    
+    /// Connects all audio nodes.
+    ///
+    /// BAPlayer calls this method when all nodes need to be connected.
+    private func connectNodes() {
+        guard let format = file?.processingFormat else {
+            log(level: .error, "No audio file has been loaded yet.")
+            return
+        }
+        
+        // Connecting to engine.mainMixerNode causes the engine to throw -10878.
+        // It is apparently harmless.
+        // https://stackoverflow.com/questions/69206206/getting-throwing-10878-when-adding-a-source-to-a-mixer
+        
+        if audioUnits.isEmpty {
+            engine.connect(playerNode.node, to: engine.mainMixerNode, format: format)
+            engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
+            return
+        }
+        
+        engine.connect(playerNode.node, to: audioUnits.first!, format: format)
+        engine.connect(audioUnits.last!, to: engine.mainMixerNode, format: format)
+        engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
+                
+        var i: Int = 0
+        while i < audioUnits.count - 1 {
+            engine.connect(audioUnits[i], to: audioUnits[i + 1], format: format)
+            i += 1
+        }
     }
     
     // MARK: - AudioPlayerNodeDelegate
