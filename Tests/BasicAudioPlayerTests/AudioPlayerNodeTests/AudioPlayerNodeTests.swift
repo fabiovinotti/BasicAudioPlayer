@@ -14,15 +14,12 @@ class AudioPlayerNodeTests: XCTestCase {
     
     // MARK: - Test Case Setup
     
-    private static var audioFileURL: URL!
     private static var audioFile: AVAudioFile!
     
     override class func setUp() {
         guard let fileURL = Bundle.module.url(forResource: "audio-sample", withExtension: "aac")
         else { fatalError("Failed to retrieve audio file URL.") }
-        
-        audioFileURL = fileURL
-        
+                
         do {
             audioFile = try AVAudioFile(forReading: fileURL)
         } catch {
@@ -31,7 +28,7 @@ class AudioPlayerNodeTests: XCTestCase {
     }
     
     override class func tearDown() {
-        audioFileURL = nil
+        audioFile = nil
     }
     
     // MARK: - Single Test Setup
@@ -46,88 +43,65 @@ class AudioPlayerNodeTests: XCTestCase {
         playerNode = nil
     }
     
+    // MARK: - Test Init
+    
+    func testInit() {
+        let node = AudioPlayerNode()
+        XCTAssertEqual(node.status, .noSource)
+        XCTAssertNil(node.file)
+        XCTAssertEqual(node.duration, 0)
+        XCTAssertFalse(node.doesLoop)
+        XCTAssertEqual(node.playbackSegment, 0...0)
+        XCTAssert(node.needsScheduling)
+        
+        let engine = AVAudioEngine()
+        engine.attach(node.node)
+        XCTAssertEqual(node.currentTime, 0)
+    }
+    
     // MARK: - Audio Loading Tests
     
-    func testLoadURL() {
-        do {
-            try playerNode.load(url: Self.audioFileURL)
-            postLoadChecks()
-        } catch {
-            XCTFail("Failed to load audio file from URL: \(error.localizedDescription)")
-        }
+    func testLoadFile_WithURL() throws {
+        try playerNode.load(url: Self.audioFile.url)
+        runLoadFileAssertions()
     }
     
-    func testLoadFile() {
+    func testLoadFile_WithAudioFile() {
         playerNode.load(file: Self.audioFile)
-        postLoadChecks()
+        runLoadFileAssertions()
     }
     
-    private func postLoadChecks() {
-        XCTAssertNotNil(playerNode.file, "File is nil after a URL load.")
+    private func runLoadFileAssertions() {
+        XCTAssertNotNil(playerNode.file)
         XCTAssert(playerNode.status == .ready)
         XCTAssert(playerNode.duration == Self.audioFile.duration)
         XCTAssert(playerNode.playbackSegment == 0...Self.audioFile.duration)
     }
     
-    // MARK: - Status Tests
-    
-    func testStatus() {
-        XCTAssertTrue(playerNode.status == .noSource,
-                      "Status is \(playerNode.status) when it should be \"noSource\".")
-        
-        playerNode.load(file: Self.audioFile)
-        XCTAssertTrue(playerNode.status == .ready,
-                      "Status is \(playerNode.status) when it should be \"ready\".")
-        
-        let engine = AVAudioEngine()
-        engine.attach(playerNode.node)
-        engine.connect(playerNode.node, to: engine.mainMixerNode, format: Self.audioFile.processingFormat)
-        
-        do { try engine.start() }
-        catch { XCTFail("Failed to start the engine: \(error.localizedDescription)") }
-        
-        playerNode.play(at: nil)
-        XCTAssertTrue(playerNode.status == .playing,
-                      "Status is \(playerNode.status) when it should be \"playing\".")
-        
-        playerNode.pause()
-        XCTAssertTrue(playerNode.status == .paused,
-                      "Status is \(playerNode.status) when it should be \"paused\".")
-        
-        playerNode.stop()
-        XCTAssertTrue(playerNode.status == .ready,
-                      "Status is \(playerNode.status) when it should be \"ready\".")
-    }
-    
-    // MARK: - CurrentTime Tests
-    
-    func testCurrentTime() {
-        let engine = AVAudioEngine()
-        engine.attach(playerNode.node)
-        
-        XCTAssert(playerNode.currentTime == 0, "Current time must be 0 when status == .noSource")
-        
-        playerNode.load(file: Self.audioFile)
-        XCTAssert(playerNode.currentTime == 0, "Current time must be 0 after a file has been loaded.")
-    }
-    
     // MARK: - Scheduling Tests
     
-    func testScheduling() {
+    func testScheduling_WithoutSegment() throws {
+        playerNode.load(file: Self.audioFile)
+        
         let engine = AVAudioEngine()
         engine.attach(playerNode.node)
-        engine.connect(playerNode.node, to: engine.mainMixerNode, format: Self.audioFile.processingFormat)
-        
+        playerNode.schedule()
+        runSchedulingAssertions(node: playerNode, segment: 0...Self.audioFile.duration)
+    }
+    
+    func testScheduling_WithSegment() throws {
         playerNode.load(file: Self.audioFile)
-        playerNode.schedule(segment: nil, at: nil)
         
-        var start = playerNode.segmentStart
-        var end = playerNode.segmentEnd
-        XCTAssertTrue(start == 0 && end == Self.audioFile.duration)
+        let engine = AVAudioEngine()
+        engine.attach(playerNode.node)
+        playerNode.schedule(segment: 2...3)
         
-        playerNode.schedule(segment: 1...5, at: nil)
-        start = playerNode.segmentStart
-        end = playerNode.segmentEnd
-        XCTAssertTrue(start == 1 && end == 5)
+        runSchedulingAssertions(node: playerNode, segment: 2...3)
+    }
+    
+    private func runSchedulingAssertions(node: AudioPlayerNode, segment: ClosedRange<TimeInterval>) {
+        XCTAssertEqual(playerNode.segmentStart, segment.lowerBound)
+        XCTAssertEqual(playerNode.segmentEnd, segment.upperBound)
+        XCTAssertFalse(playerNode.needsScheduling)
     }
 }

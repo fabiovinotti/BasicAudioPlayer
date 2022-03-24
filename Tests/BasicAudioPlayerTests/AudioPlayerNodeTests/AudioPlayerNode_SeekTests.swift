@@ -62,13 +62,8 @@ class AudioPlayerNode_SeekTests: XCTestCase {
         XCTAssert(playerNode.currentTime == 5)
     }
     
-    func testSeek_statusPause() {
-        do {
-            try engine.start()
-        } catch {
-            XCTFail("Failed to start audio engine: \(error.localizedDescription)")
-        }
-        
+    func testSeek_statusPause() throws {
+        try engine.start()
         playerNode.load(file: Self.audioFile)
         playerNode.play(at: nil)
         playerNode.pause()
@@ -78,42 +73,31 @@ class AudioPlayerNode_SeekTests: XCTestCase {
         XCTAssert(playerNode.currentTime == 5)
     }
     
-    func testSeek_statusPlaying() {
+    func testSeek_statusPlaying() throws {
         playerNode.load(file: Self.audioFile)
-        
-        do {
-            try engine.start()
-        } catch {
-            return XCTFail("Failed to start the audio engine: \(error.localizedDescription)")
-        }
-        
+        try engine.start()
         playerNode.play(at: nil)
         XCTAssert(playerNode.status == .playing, "Status is \(playerNode.status) when it should be \"playing\".")
         playerNode.seek(to: 5)
         XCTAssert(playerNode.currentTime == 5)
     }
     
-    func testSeek_negativeTimeInterval() {
+    func testSeek_WithNegativeTimeInterval() throws {
         playerNode.load(file: Self.audioFile)
         playerNode.seek(to: -10)
-        XCTAssertTrue(playerNode.currentTime == 0, "Current time must be >= 0.")
+        XCTAssertEqual(playerNode.currentTime, 0, "Current time must be >= 0.")
         
-        do {
-            try engine.start()
-        } catch {
-            return XCTFail("Failed to start the audio engine: \(error.localizedDescription)")
-        }
-        
+        try engine.start()
         playerNode.play(at: nil)
         playerNode.seek(to: -10)
-        XCTAssertTrue(playerNode.currentTime == 0, "Current time must be >= 0.")
+        XCTAssertEqual(playerNode.currentTime, 0, "Current time must be >= 0.")
         
         playerNode.pause()
         playerNode.seek(to: -10)
-        XCTAssertTrue(playerNode.currentTime == 0, "Current time must >= 0.")
+        XCTAssertEqual(playerNode.currentTime, 0, "Current time must >= 0.")
         
         playerNode.stop()
         playerNode.seek(to: -10)
-        XCTAssertTrue(playerNode.currentTime == 0, "Current time must >= 0.")
+        XCTAssertEqual(playerNode.currentTime, 0, "Current time must >= 0.")
     }
 }

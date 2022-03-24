@@ -34,52 +34,52 @@ class BAPlayer_PlaybackTests: XCTestCase {
     // MARK: - Single Test Setup
     
     private var player: BAPlayer!
-
+    
     override func setUpWithError() throws {
         player = BAPlayer()
     }
-
+    
     override func tearDownWithError() throws {
         player = nil
     }
     
     // MARK: - Test Play
     
-    func testPlayBeforeLoading() {
+    func testPlay_BeforeLoading() {
         player.play()
         
         XCTAssertEqual(player.status, .noSource)
         XCTAssertFalse(player.engine.isRunning)
     }
     
-    func testPlayWhenStopped() {
+    func testPlay_WhenStopped() {
         player.load(file: Self.audioFile)
         player.play()
-        checksForPlay()
+        runPlayAssertions()
     }
     
-    func testPlayWhenPaused() {
+    func testPlay_WhenPaused() {
         player.load(file: Self.audioFile)
         player.play()
         player.pause()
         player.play()
-        checksForPlay()
+        runPlayAssertions()
     }
     
-    private func checksForPlay() {
+    private func runPlayAssertions() {
         XCTAssertEqual(player.status, .playing)
         XCTAssert(player.engine.isRunning)
     }
     
     // MARK: - Test Pause
     
-    func testPauseBeforeLoading() {
+    func testPause_BeforeLoading() {
         player.pause()
         XCTAssertFalse(player.engine.isRunning)
         XCTAssertEqual(player.status, .noSource)
     }
     
-    func testPauseOnPlaying() {
+    func testPause_WhenPlaying() {
         player.load(file: Self.audioFile)
         player.play()
         player.pause()
@@ -88,7 +88,7 @@ class BAPlayer_PlaybackTests: XCTestCase {
         XCTAssertEqual(player.status, .paused)
     }
     
-    func testPauseWhenStopped() {
+    func testPause_WhenStopped() {
         player.load(file: Self.audioFile)
         player.pause()
         
@@ -98,20 +98,20 @@ class BAPlayer_PlaybackTests: XCTestCase {
     
     // MARK: - Test Stop
     
-    func testStopBeforeLoading() {
+    func testStop_BeforeLoading() {
         player.stop()
         XCTAssertEqual(player.status, .noSource)
         XCTAssertFalse(player.engine.isRunning)
     }
     
-    func testStopOnPlaying() {
+    func testStop_WhenPlaying() {
         player.load(file: Self.audioFile)
         player.play()
         player.stop()
         checksForStop()
     }
     
-    func testStopWhenPaused() {
+    func testStop_WhenPaused() {
         player.load(file: Self.audioFile)
         player.play()
         player.pause()

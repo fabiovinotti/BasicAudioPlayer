@@ -33,22 +33,39 @@ class BAPlayerTests: XCTestCase {
     
     // MARK: - Test Load
     
-    func testLoad() {
+    func testLoadFile_WithURL() throws {
+        let player = BAPlayer()
+        try player.load(url: Self.audioFile.url)
+        try checksForLoad(player: player)
+        
+        player.play()
+        try player.load(url: Self.audioFile.url)
+        try checksForLoad(player: player)
+        
+        player.play()
+        player.pause()
+        try player.load(url: Self.audioFile.url)
+        try checksForLoad(player: player)
+    }
+    
+    func testLoadFile_WithAudioFile() throws {
         let player = BAPlayer()
         player.load(file: Self.audioFile)
-        checksForLoad(player: player)
+        try checksForLoad(player: player)
         
         player.play()
         player.load(file: Self.audioFile)
-        checksForLoad(player: player)
+        try checksForLoad(player: player)
         
         player.play()
         player.pause()
         player.load(file: Self.audioFile)
-        checksForLoad(player: player)
+        try checksForLoad(player: player)
     }
     
-    private func checksForLoad(player: BAPlayer) {
+    private func checksForLoad(player: BAPlayer) throws {
+        let file = try XCTUnwrap(player.file)
+        XCTAssertEqual(player.duration, file.duration)
         XCTAssertEqual(player.status, .ready)
         XCTAssertFalse(player.engine.isRunning)
     }
