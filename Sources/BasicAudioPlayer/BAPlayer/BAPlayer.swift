@@ -9,7 +9,7 @@
 import AVFoundation
 
 /// A base class to create AVAudioEngine-based audio players.
-open class BAPlayer: AudioPlayerNodeDelegate {
+public class BAPlayer: AudioPlayerNodeDelegate {
     
     // MARK: - Properties
     
