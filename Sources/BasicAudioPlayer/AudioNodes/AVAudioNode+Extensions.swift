@@ -13,6 +13,8 @@ extension AVAudioNode {
     // MARK: - Detaching Nodes
     
     /// Detaches the audio node from its audio engine.
+    ///
+    /// If the node is not attached to an audio engine this method does nothing.
     public func detach() {
         guard let engine = engine else { return }
         engine.detach(self)

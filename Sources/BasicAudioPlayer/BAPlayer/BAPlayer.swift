@@ -8,7 +8,13 @@
 
 import AVFoundation
 
-/// A base class to create AVAudioEngine-based audio players.
+/// A basic audio player built with AVAudioEngine and its accessory elements.
+///
+/// Under the hood, BAPlayer coordinates an audio engine and an audio player node,
+/// so that the two do not need to be managed directly.
+///
+/// You can add an unlimited number of audio units to the player to affect the audio
+/// coming out of the player node.
 public class BAPlayer: AudioPlayerNodeDelegate {
     
     // MARK: - Properties
@@ -47,7 +53,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
     /// of the last unit is the engine's main mixer node.
     public private(set) var audioUnits: [AVAudioUnit] = .init()
     
-    // MARK: - Initializers
+    // MARK: - Creating a Player
     
     /// Creates a player and load the file at the specified URL.
     public convenience init(url fileURL: URL) throws {
@@ -61,6 +67,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
         load(file: file)
     }
     
+    /// Creates a player.
     public init() {
         playerNode.delegate = self
         engine.attach(playerNode.node)
