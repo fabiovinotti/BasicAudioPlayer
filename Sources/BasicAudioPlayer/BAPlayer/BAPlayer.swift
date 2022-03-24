@@ -53,6 +53,9 @@ public class BAPlayer: AudioPlayerNodeDelegate {
     /// of the last unit is the engine's main mixer node.
     public private(set) var audioUnits: [AVAudioUnit] = .init()
     
+    /// A closure executed when the player node status changes.
+    private var onStatusChangeHandler: ((Status) -> Void)?
+    
     // MARK: - Creating a Player
     
     /// Creates a player and load the file at the specified URL.
@@ -218,11 +221,23 @@ public class BAPlayer: AudioPlayerNodeDelegate {
         }
     }
     
+    // MARK: - Handling Events
+    
+    /// Adds an action to perform when the player status changes.
+    ///
+    /// Only the last action added through this method will be evoked when the status changes.
+    public func onStatusChange(perform action: @escaping (Status) -> Void) {
+        onStatusChangeHandler = action
+    }
+    
     // MARK: - AudioPlayerNodeDelegate
     
     public func playerNodeStatusDidChange(_ node: AudioPlayerNode,
                                           from oldStatus: AudioPlayerNode.Status,
-                                          to newStatus: AudioPlayerNode.Status) {}
+                                          to newStatus: AudioPlayerNode.Status) {
+        
+        onStatusChangeHandler?(newStatus)
+    }
     
     public func playerNodePlaybackDidComplete(_ node: AudioPlayerNode) {
         playerNode.segmentStart = 0
