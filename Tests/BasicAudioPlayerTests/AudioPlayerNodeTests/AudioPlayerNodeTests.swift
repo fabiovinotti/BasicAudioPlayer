@@ -12,7 +12,7 @@ import AVFAudio
 
 class AudioPlayerNodeTests: XCTestCase {
     
-    // MARK: - Test Case State
+    // MARK: - Test Case Setup
     
     private static var audioFileURL: URL!
     private static var audioFile: AVAudioFile!
@@ -34,7 +34,7 @@ class AudioPlayerNodeTests: XCTestCase {
         audioFileURL = nil
     }
     
-    // MARK: - Single Test Initial State
+    // MARK: - Single Test Setup
     
     private var playerNode: AudioPlayerNode!
     
@@ -109,92 +109,6 @@ class AudioPlayerNodeTests: XCTestCase {
         
         playerNode.load(file: Self.audioFile)
         XCTAssert(playerNode.currentTime == 0, "Current time must be 0 after a file has been loaded.")
-    }
-    
-    // MARK: - Seek Tests
-    
-    func testSeek_statusNoSource() {
-        let engine = AVAudioEngine()
-        engine.attach(playerNode.node)
-        
-        playerNode.seek(to: 5)
-        XCTAssert(playerNode.currentTime == 0, "Current time must be 0 when status == .noSource")
-    }
-    
-    func testSeek_statusReady() {
-        let engine = AVAudioEngine()
-        engine.attach(playerNode.node)
-                
-        playerNode.load(file: Self.audioFile)
-        playerNode.seek(to: 5)
-        XCTAssert(playerNode.currentTime == 5)
-    }
-    
-    func testSeek_statusPause() {
-        let engine = AVAudioEngine()
-        engine.attach(playerNode.node)
-        engine.connect(playerNode.node, to: engine.mainMixerNode, format: Self.audioFile.processingFormat)
-        
-        do {
-            try engine.start()
-        } catch {
-            XCTFail("Failed to start audio engine: \(error.localizedDescription)")
-        }
-        
-        playerNode.load(file: Self.audioFile)
-        playerNode.play(at: nil)
-        playerNode.pause()
-        XCTAssert(playerNode.status == .paused, "Status is \(playerNode.status) when it should be paused.")
-        
-        playerNode.seek(to: 5)
-        XCTAssert(playerNode.currentTime == 5)
-    }
-    
-    func testSeek_statusPlaying() {
-        let engine = AVAudioEngine()
-        engine.attach(playerNode.node)
-        engine.connect(playerNode.node, to: engine.mainMixerNode, format: Self.audioFile.processingFormat)
-        
-        playerNode.load(file: Self.audioFile)
-        
-        do {
-            try engine.start()
-        } catch {
-            XCTFail("Failed to start the audio engine: \(error.localizedDescription)")
-        }
-        
-        playerNode.play(at: nil)
-        XCTAssert(playerNode.status == .playing, "Status is \(playerNode.status) when it should be \"playing\".")
-        playerNode.seek(to: 5)
-        XCTAssert(playerNode.currentTime == 5)
-    }
-    
-    func testSeek_negativeTimeInterval() {
-        let engine = AVAudioEngine()
-        engine.attach(playerNode.node)
-        engine.connect(playerNode.node, to: engine.mainMixerNode, format: Self.audioFile.processingFormat)
-        
-        playerNode.load(file: Self.audioFile)
-        playerNode.seek(to: -10)
-        XCTAssertTrue(playerNode.currentTime == 0, "Current time must be >= 0.")
-        
-        do {
-            try engine.start()
-        } catch {
-            XCTFail("Failed to start the audio engine: \(error.localizedDescription)")
-        }
-        
-        playerNode.play(at: nil)
-        playerNode.seek(to: -10)
-        XCTAssertTrue(playerNode.currentTime == 0, "Current time must be >= 0.")
-        
-        playerNode.pause()
-        playerNode.seek(to: -10)
-        XCTAssertTrue(playerNode.currentTime == 0, "Current time must >= 0.")
-        
-        playerNode.stop()
-        playerNode.seek(to: -10)
-        XCTAssertTrue(playerNode.currentTime == 0, "Current time must >= 0.")
     }
     
     // MARK: - Scheduling Tests
