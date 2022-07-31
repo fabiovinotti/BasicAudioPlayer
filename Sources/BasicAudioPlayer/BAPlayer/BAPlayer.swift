@@ -140,9 +140,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
     ///
     /// The unit will be placed at the end of the audio unit chain.
     public func addAudioUnit(_ unit: AVAudioUnit) {
-        if status == .playing || status == .paused {
-            stop()
-        }
+        stop()
         
         audioUnits.append(unit)
         engine.attach(unit)
