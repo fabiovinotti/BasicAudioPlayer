@@ -1,6 +1,6 @@
 # BasicAudioPlayer
 
-BasicAudioPlayer is a library that makes it easier to create AVAudioEngine-based audio players.
+BasicAudioPlayer is a Swift library that makes it easier to create AVAudioEngine-based audio players.
 
 ## Installation
 

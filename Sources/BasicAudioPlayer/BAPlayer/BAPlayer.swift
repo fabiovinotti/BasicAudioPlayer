@@ -124,6 +124,9 @@ public class BAPlayer: AudioPlayerNodeDelegate {
         engine.pause()
     }
     
+    /// Stops the playback and removes any scheduled events.
+    ///
+    /// This method does nothing when the player is playing or paused.
     public func stop() {
         guard status == .playing || status == .paused else {
             log(level: .info, "The player is already stopped.")
