@@ -59,10 +59,10 @@ extension BAPlayer {
         }
         
         let renderingSampleRate = engine.manualRenderingFormat.sampleRate
-        let totalSamples = AVAudioFramePosition(renderingDuration * renderingSampleRate)
+        let totalFrames = AVAudioFramePosition(renderingDuration * renderingSampleRate)
         
-        while engine.manualRenderingSampleTime < totalSamples {
-            let remainingFrames = UInt32(totalSamples - engine.manualRenderingSampleTime)
+        while engine.manualRenderingSampleTime < totalFrames {
+            let remainingFrames = UInt32(totalFrames - engine.manualRenderingSampleTime)
             let framesToRender = min(remainingFrames, buffer.frameCapacity)
             let status = try engine.renderOffline(framesToRender, to: buffer)
             
@@ -72,7 +72,7 @@ extension BAPlayer {
                 
             case .success:
                 try destinationFile.write(from: buffer)
-                let progress = Double(engine.manualRenderingSampleTime) / Double(totalSamples)
+                let progress = Double(engine.manualRenderingSampleTime) / Double(totalFrames)
                 progressHandler(progress)
                 
             case .insufficientDataFromInputNode:
