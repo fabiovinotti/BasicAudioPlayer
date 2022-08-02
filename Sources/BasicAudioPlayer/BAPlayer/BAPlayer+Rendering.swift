@@ -27,9 +27,29 @@ extension BAPlayer {
                        region: ClosedRange<TimeInterval>,
                        progressHandler: ProgressHandler? = nil) throws {
         
-        let renderingDuration = region.upperBound - region.lowerBound
+        try render(
+            to: destinationFile,
+            startTime: region.lowerBound,
+            duration: region.upperBound - region.lowerBound,
+            progressHandler: progressHandler
+        )
+    }
+    
+    /// Renders the player's audio to an AVAudioFile.
+    ///
+    /// - parameter destinationFile: The rendering operation output file. Initialize it for writing.
+    /// - parameter startTime: The starting point of the rendering.
+    /// - parameter duration: The number of seconds to render. Leave it nil to render to the end of the file.
+    /// - parameter progressHandler: A closure called every time the rendering progresses.
+    ///
+    public func render(to destinationFile: AVAudioFile,
+                       startTime: TimeInterval = 0,
+                       duration: TimeInterval? = nil,
+                       progressHandler: ProgressHandler? = nil) throws {
         
-        guard region.lowerBound >= 0 && renderingDuration > 0 else {
+        let duration = duration ?? self.duration - startTime
+        
+        guard startTime >= 0 && duration > 0 else {
             throw BAPError.renderingInvalidRegion
         }
         
@@ -46,7 +66,7 @@ extension BAPlayer {
             maximumFrameCount: 4096
         )
         
-        playerNode.seek(to: region.lowerBound)
+        playerNode.seek(to: startTime)
         playerNode.schedule()
         try engine.start()
         playerNode.play()
@@ -59,7 +79,7 @@ extension BAPlayer {
         }
         
         let renderingSampleRate = engine.manualRenderingFormat.sampleRate
-        let totalFrames = AVAudioFramePosition(renderingDuration * renderingSampleRate)
+        let totalFrames = AVAudioFramePosition(duration * renderingSampleRate)
         
         while engine.manualRenderingSampleTime < totalFrames {
             let remainingFrames = UInt32(totalFrames - engine.manualRenderingSampleTime)
