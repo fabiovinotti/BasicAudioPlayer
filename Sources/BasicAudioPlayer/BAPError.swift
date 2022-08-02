@@ -8,14 +8,14 @@
 
 public enum BAPError: Error {
     
-    case renderingInvalidRegion
+    case renderingInvalidRegionBounds
     case renderingNoSourceLoaded
     case renderingBufferCreationFailed
     case renderingUnknownError
     
     public var description: String {
         switch self {
-        case .renderingInvalidRegion:
+        case .renderingInvalidRegionBounds:
             return "The rendering region is invalid."
             
         case .renderingNoSourceLoaded:

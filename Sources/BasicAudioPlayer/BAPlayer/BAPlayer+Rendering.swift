@@ -54,7 +54,7 @@ extension BAPlayer {
         let duration = duration ?? self.duration - startTime
         
         guard startTime >= 0 && duration > 0 else {
-            throw BAPError.renderingInvalidRegion
+            throw BAPError.renderingInvalidRegionBounds
         }
         
         playerNode.stop()
