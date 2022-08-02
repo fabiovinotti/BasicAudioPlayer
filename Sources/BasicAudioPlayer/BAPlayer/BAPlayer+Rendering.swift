@@ -25,7 +25,7 @@ extension BAPlayer {
     ///
     public func render(to destinationFile: AVAudioFile,
                        region: ClosedRange<TimeInterval>,
-                       progressHandler: @escaping ProgressHandler) throws {
+                       progressHandler: ProgressHandler? = nil) throws {
         
         let renderingDuration = region.upperBound - region.lowerBound
         
@@ -73,7 +73,7 @@ extension BAPlayer {
             case .success:
                 try destinationFile.write(from: buffer)
                 let progress = Double(engine.manualRenderingSampleTime) / Double(totalFrames)
-                progressHandler(progress)
+                progressHandler?(progress)
                 
             case .insufficientDataFromInputNode:
                 throw BAPError.renderingUnknownError
