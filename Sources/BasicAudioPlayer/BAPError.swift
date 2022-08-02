@@ -16,7 +16,7 @@ public enum BAPError: Error {
     public var description: String {
         switch self {
         case .renderingInvalidRegionBounds:
-            return "The rendering region is invalid."
+            return "The rendering region bounds are invalid"
             
         case .renderingNoSourceLoaded:
             return "No audio file is loaded"
