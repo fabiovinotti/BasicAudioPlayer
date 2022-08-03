@@ -12,13 +12,11 @@ import Combine
 extension AVAudioPlayerNode {
     
     public var playerTime: AVAudioTime? {
-        var playerTime: AVAudioTime? = nil
-        
         if let nodeTime = lastRenderTime, nodeTime.isSampleTimeValid {
-            playerTime = self.playerTime(forNodeTime: nodeTime)
+            return playerTime(forNodeTime: nodeTime)
         }
         
-        return playerTime
+        return nil
     }
     
 }
