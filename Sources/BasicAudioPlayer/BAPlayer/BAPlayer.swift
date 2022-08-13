@@ -99,7 +99,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
     
     public func play() {
         guard status != .noSource else {
-            log(level: .error, "No audio file to play. Load an audio file before calling play.")
+            log.info("Failed to play: No audio file is loaded.")
             return
         }
         
@@ -107,7 +107,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
             do {
                 try engine.start()
             } catch {
-                log(level: .error, "Failed to start the engine: \(error.localizedDescription)")
+                log.error("Failed to start the engine: \(error.localizedDescription)")
             }
         }
         
@@ -116,7 +116,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
     
     public func pause() {
         guard status == .playing else {
-            log(level: .info, "The player is not playing.")
+            log.info("Couldn't pause the player: the player is not playing.")
             return
         }
         
@@ -129,7 +129,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
     /// This method does nothing when the player is playing or paused.
     public func stop() {
         guard status == .playing || status == .paused else {
-            log(level: .info, "The player is already stopped.")
+            log.info("Couldn't stop the player: the player is already stopped.")
             return
         }
         
@@ -158,7 +158,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
         let mixer = engine.mainMixerNode
         
         guard let inputConnection = engine.inputConnectionPoint(for: mixer, inputBus: 0) else {
-            log(level: .error, "Nodes don't appear to be connected even if a file has been loaded.")
+            log.error("Nodes are not connected even if a file is loaded.")
             redoConnections() // Try to correct connections.
             return
         }
@@ -197,7 +197,7 @@ public class BAPlayer: AudioPlayerNodeDelegate {
     /// BAPlayer calls this method when all nodes need to be connected.
     private func connectNodes() {
         guard let format = file?.processingFormat else {
-            log(level: .error, "No audio file has been loaded yet.")
+            log.error("Failed to connect audio nodes: no audio file is loaded.")
             return
         }
         

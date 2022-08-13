@@ -22,10 +22,10 @@ extension BAPlayer {
     
     public func removeTimeObserver(_ observer: Any) {
         guard let o = observer as? DispatchSourceTimer else {
-            log(level: .error, "An error occurred while removing time observer: The object provided is not an observer.")
+            log.info("Failed to remove observer: invalid parameter.")
             return
         }
-        
+
         o.cancel()
     }
     

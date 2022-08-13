@@ -99,7 +99,7 @@ extension BAPlayer {
                 throw BAPError.renderingUnknownError
                 
             case .cannotDoInCurrentContext:
-                log(level: .error, "System can’t perform in current context")
+                log.error("System can’t perform in current context")
                 
             @unknown default:
                 fatalError("Unknown manual rendering status returned")

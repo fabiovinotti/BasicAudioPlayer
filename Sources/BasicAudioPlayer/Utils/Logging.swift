@@ -9,18 +9,94 @@
 import Foundation
 import os
 
-fileprivate let moduleLogger = Logger(subsystem: "BasicAudioPlayer", category: "general")
+let log = LoggerWrapper(subsystem: "BasicAudioPlayer", category: "general")
 
-/// Logs a message of the specified type.
-///
-/// The "file", "function" and "line" parameters are automatically collected when the function is called.
-/// Don't provide any value for those.
-func log(level: OSLogType,
-         _ message: String,
-         file: String = #file,
-         function: String = #function,
-         line: Int = #line) {
-    
-    let fileName = (file as NSString).lastPathComponent
-    moduleLogger.log(level: level, "\(fileName) : \(function) : \(line) -> \(message)")
+struct LoggerWrapper {
+    private let logger: Logger
+
+    init(logger: Logger) {
+        self.logger = logger
+    }
+
+    init(subsystem: String, category: String) {
+        self.logger = Logger(subsystem: subsystem, category: category)
+    }
+
+    func debug(
+        _ message: String,
+        fileName: String = #file,
+        functionName: String = #function,
+        lineNumber: Int = #line
+    ) {
+        log(
+            level: .debug,
+            message,
+            fileName: fileName,
+            functionName: functionName,
+            lineNumber: lineNumber)
+    }
+
+    func info(
+        _ message: String,
+        fileName: String = #file,
+        functionName: String = #function,
+        lineNumber: Int = #line
+    ) {
+        log(
+            level: .info,
+            message,
+            fileName: fileName,
+            functionName: functionName,
+            lineNumber: lineNumber)
+    }
+
+    func error(
+        _ message: String,
+        fileName: String = #file,
+        functionName: String = #function,
+        lineNumber: Int = #line
+    ) {
+        log(
+            level: .error,
+            message,
+            fileName: fileName,
+            functionName: functionName,
+            lineNumber: lineNumber)
+    }
+
+    func fault(
+        _ message: String,
+        fileName: String = #file,
+        functionName: String = #function,
+        lineNumber: Int = #line
+    ) {
+        log(
+            level: .fault,
+            message,
+            fileName: fileName,
+            functionName: functionName,
+            lineNumber: lineNumber)
+    }
+
+    func log(
+        level: OSLogType,
+        _ message: String,
+        fileName: String = #file,
+        functionName: String = #function,
+        lineNumber: Int = #line
+    ) {
+        logger.log(
+            level: level,
+            "\(fileName.lastPathComponent) \(functionName) \(lineNumber) > \(message)")
+    }
+
 }
+
+extension String {
+
+    fileprivate var lastPathComponent: String {
+        (self as NSString).lastPathComponent
+    }
+
+}
+
