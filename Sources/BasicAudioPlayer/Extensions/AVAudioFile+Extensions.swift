@@ -11,7 +11,7 @@ import AVFoundation
 extension AVAudioFile {
     
     /// The duration of the audio file measured in seconds.
-    var duration: TimeInterval {
+    public var duration: TimeInterval {
         Double(length) / fileFormat.sampleRate
     }
     
