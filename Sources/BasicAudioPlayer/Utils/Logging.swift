@@ -6,8 +6,7 @@
 //  Licensed under MIT License.
 //
 
-import Foundation
-import os
+import os.log
 
 let log = LoggerWrapper(subsystem: "BasicAudioPlayer", category: "general")
 
