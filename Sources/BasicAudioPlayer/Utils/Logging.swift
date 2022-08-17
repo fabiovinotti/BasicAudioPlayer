@@ -91,12 +91,3 @@ struct LoggerWrapper {
     }
 
 }
-
-extension String {
-
-    fileprivate var lastPathComponent: String {
-        (self as NSString).lastPathComponent
-    }
-
-}
-
