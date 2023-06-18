@@ -15,7 +15,7 @@ import AVFoundation
 ///
 /// You can add an unlimited number of audio units to the player to affect the audio
 /// coming out of the player node.
-public class BAPlayer: AudioPlayerNodeDelegate {
+public class BAPlayer {
     
     // MARK: - Properties
     
@@ -230,22 +230,27 @@ public class BAPlayer: AudioPlayerNodeDelegate {
     public func onStatusChange(perform action: @escaping (Status) -> Void) {
         onStatusChangeHandler = action
     }
-    
-    // MARK: - AudioPlayerNodeDelegate
-    
+
+}
+
+// MARK: - AudioPlayerNodeDelegate
+
+extension BAPlayer: AudioPlayerNodeDelegate {
+
     public func playerNodeStatusDidChange(_ node: AudioPlayerNode,
                                           from oldStatus: AudioPlayerNode.Status,
                                           to newStatus: AudioPlayerNode.Status) {
-        
+
         onStatusChangeHandler?(newStatus)
     }
-    
+
     public func playerNodePlaybackDidComplete(_ node: AudioPlayerNode) {
-        playerNode.segmentStart = 0
+        playerNode.segmentStart = duration
         playerNode.segmentEnd = playerNode.duration
-        
+
         if !doesLoop {
             engine.stop()
         }
     }
+
 }

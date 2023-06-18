@@ -57,9 +57,9 @@ public class AudioPlayerNode {
         set {
             let start = max(0, min(newValue.lowerBound, duration))
             let end = max(0, min(newValue.upperBound, duration))
-            
-            guard start < end else {
-                log.error("Failed to set playback region: duration <= 0.")
+
+            guard start <= end else {
+                log.error("Failed to set playback region: duration < 0.")
                 return
             }
             
@@ -159,7 +159,7 @@ public class AudioPlayerNode {
         if let newSegment = segment {
             playbackSegment = newSegment
         }
-        
+
         if segmentStart == duration { segmentStart = 0 }
         
         let startFrame = AVAudioFramePosition(segmentStart * file.fileFormat.sampleRate)
