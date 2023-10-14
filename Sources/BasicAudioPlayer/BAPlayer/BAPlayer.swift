@@ -223,11 +223,9 @@ public class BAPlayer {
     }
     
     // MARK: - Handling Events
-    
+
     /// Adds an action to perform when the player status changes.
-    ///
-    /// Only the last action added through this method will be evoked when the status changes.
-    public func onStatusChange(perform action: @escaping (Status) -> Void) {
+    public func onStatusChange(perform action: ((Status) -> Void)? = nil) {
         onStatusChangeHandler = action
     }
 
