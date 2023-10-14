@@ -70,7 +70,7 @@ class AudioPlayerNodeTests: XCTestCase {
         playerNode.load(file: Self.audioFile)
         runLoadFileAssertions()
     }
-    
+
     private func runLoadFileAssertions() {
         XCTAssertNotNil(playerNode.file)
         XCTAssert(playerNode.status == .ready)
@@ -82,11 +82,11 @@ class AudioPlayerNodeTests: XCTestCase {
     
     func testScheduling_WithoutSegment() throws {
         playerNode.load(file: Self.audioFile)
-        
+
         let engine = AVAudioEngine()
         engine.attach(playerNode.node)
         playerNode.schedule()
-        runSchedulingAssertions(node: playerNode, segment: 0...Self.audioFile.duration)
+        runSchedulingAssertions(segment: 0...Self.audioFile.duration)
     }
     
     func testScheduling_WithSegment() throws {
@@ -96,10 +96,10 @@ class AudioPlayerNodeTests: XCTestCase {
         engine.attach(playerNode.node)
         playerNode.schedule(segment: 2...3)
         
-        runSchedulingAssertions(node: playerNode, segment: 2...3)
+        runSchedulingAssertions(segment: 2...3)
     }
-    
-    private func runSchedulingAssertions(node: AudioPlayerNode, segment: ClosedRange<TimeInterval>) {
+
+    private func runSchedulingAssertions(segment: ClosedRange<TimeInterval>) {
         XCTAssertEqual(playerNode.segmentStart, segment.lowerBound)
         XCTAssertEqual(playerNode.segmentEnd, segment.upperBound)
         XCTAssertFalse(playerNode.needsScheduling)
