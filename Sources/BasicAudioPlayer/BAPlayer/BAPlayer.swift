@@ -126,9 +126,9 @@ public class BAPlayer {
     
     /// Stops the playback and removes any scheduled events.
     ///
-    /// This method does nothing when the player is playing or paused.
+    /// This method does nothing when no audio file is loaded.
     public func stop() {
-        guard status == .playing || status == .paused else {
+        guard status != .noSource else {
             log.info("Couldn't stop the player: the player is already stopped.")
             return
         }
