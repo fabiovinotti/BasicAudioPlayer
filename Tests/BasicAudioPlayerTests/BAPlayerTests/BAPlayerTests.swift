@@ -65,6 +65,7 @@ class BAPlayerTests: XCTestCase {
     
     private func checksForLoad(player: BAPlayer) throws {
         let file = try XCTUnwrap(player.file)
+        XCTAssertEqual(player.currentTime, 0)
         XCTAssertEqual(player.duration, file.duration)
         XCTAssertEqual(player.status, .ready)
         XCTAssertFalse(player.engine.isRunning)
