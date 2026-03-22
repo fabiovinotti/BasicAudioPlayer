@@ -210,9 +210,9 @@ public class AudioPlayerNode {
             return
         }
         
-        if needsScheduling { schedule(at: when) }
+        if needsScheduling { schedule() }
         
-        node.play()
+        node.play(at: when)
         
         // Collect the offset of the sample time if it is nil.
         if sampleTimeOffset == nil, let pt = node.playerTime {
