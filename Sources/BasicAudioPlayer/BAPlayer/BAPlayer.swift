@@ -97,7 +97,7 @@ public class BAPlayer {
     
     // MARK: - Controlling Playback
     
-    public func play() {
+    public func play(at when: AVAudioTime? = nil) {
         guard status != .noSource else {
             log.info("Failed to play: No audio file is loaded.")
             return
@@ -111,7 +111,7 @@ public class BAPlayer {
             }
         }
         
-        playerNode.play()
+        playerNode.play(at: when)
     }
     
     public func pause() {
