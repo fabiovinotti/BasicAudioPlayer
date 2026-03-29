@@ -72,7 +72,11 @@ public class AudioPlayerNode {
     }
     
     private var _playbackSegment: ClosedRange<TimeInterval> = 0...0
-    /// The portion of the audio source that will be scheduled.
+    
+    /// The portion of the audio source that will be scheduled for playback.
+    ///
+    /// Both bounds are clamped to `0...duration`. Setting a range where
+    /// `lowerBound > upperBound` is ignored.
     public var playbackSegment: ClosedRange<TimeInterval> {
         get { _playbackSegment }
         set {
@@ -83,7 +87,7 @@ public class AudioPlayerNode {
                 log.error("Failed to set playback region: duration < 0.")
                 return
             }
-            
+
             _playbackSegment = start...end
         }
     }
@@ -185,7 +189,7 @@ public class AudioPlayerNode {
     ///   - segment: A range indicating the segment start and end times.
     ///   - time: The `AVAudioTime` at which the segment should play.
     public func schedule(segment: ClosedRange<TimeInterval>? = nil, at time: AVAudioTime? = nil) {
-        guard let file = file else {
+        guard let file else {
             log.error("Scheduling failed: no audio file to schedule.")
             return
         }

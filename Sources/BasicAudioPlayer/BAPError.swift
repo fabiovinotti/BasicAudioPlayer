@@ -9,7 +9,7 @@
 import Foundation
 
 /// Errors that can occur during BAPlayer operations.
-public enum BAPError: LocalizedError, Sendable {
+public enum BAPError: LocalizedError {
     
     /// The rendering region has invalid start time or duration.
     case renderingInvalidRegionBounds
