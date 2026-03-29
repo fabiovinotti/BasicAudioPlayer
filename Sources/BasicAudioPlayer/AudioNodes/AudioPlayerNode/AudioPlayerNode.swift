@@ -189,13 +189,11 @@ public class AudioPlayerNode {
             log.error("Scheduling failed: no audio file to schedule.")
             return
         }
-        
-        if let newSegment = segment {
-            playbackSegment = newSegment
+
+        if let segment {
+            playbackSegment = segment
         }
 
-        if segmentStart == duration { segmentStart = 0 }
-        
         let startFrame = AVAudioFramePosition(segmentStart * file.fileFormat.sampleRate)
         let endFrame = AVAudioFramePosition(segmentEnd * file.fileFormat.sampleRate)
         let frameCount = AVAudioFrameCount(endFrame - startFrame)
@@ -210,7 +208,7 @@ public class AudioPlayerNode {
             startingFrame: startFrame,
             frameCount: frameCount,
             at: time,
-            completionCallbackType: .dataPlayedBack) {_ in
+            completionCallbackType: .dataPlayedBack) { [weak self] _ in
                 Task { [weak self] in
                     await self?.playbackCompletionHandler()
                 }
@@ -255,7 +253,13 @@ public class AudioPlayerNode {
             return
         }
         
-        if needsScheduling { schedule() }
+        if needsScheduling {
+            // If the position is at the end, reset to the beginning of the track.
+            if segmentStart >= duration && duration > 0 {
+                playbackSegment = 0...duration
+            }
+            schedule()
+        }
         
         node.play(at: when)
         
