@@ -237,22 +237,26 @@ public class BAPlayer {
         // Connecting to engine.mainMixerNode causes the engine to throw -10878.
         // It is apparently harmless.
         // https://stackoverflow.com/questions/69206206/getting-throwing-10878-when-adding-a-source-to-a-mixer
-        
+
+        let mixer = engine.mainMixerNode
+
         if audioUnits.isEmpty {
-            engine.connect(playerNode.node, to: engine.mainMixerNode, format: format)
-            engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
+            engine.connect(playerNode.node, to: mixer, format: format)
+            engine.connect(mixer, to: engine.outputNode, format: format)
             return
         }
         
-        engine.connect(playerNode.node, to: audioUnits.first!, format: format)
-        engine.connect(audioUnits.last!, to: engine.mainMixerNode, format: format)
-        engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
-                
-        var i: Int = 0
-        while i < audioUnits.count - 1 {
+        // Player → first unit
+        engine.connect(playerNode.node, to: audioUnits[0], format: format)
+        
+        // Chain audio units together
+        for i in 0..<(audioUnits.count - 1) {
             engine.connect(audioUnits[i], to: audioUnits[i + 1], format: format)
-            i += 1
         }
+        
+        // Last unit → mixer → output
+        engine.connect(audioUnits[audioUnits.count - 1], to: mixer, format: format)
+        engine.connect(mixer, to: engine.outputNode, format: format)
     }
     
     // MARK: - Handling Events
