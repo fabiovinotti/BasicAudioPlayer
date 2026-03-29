@@ -34,11 +34,21 @@ extension BAPlayer {
     
     /// Executes a function when the indicated playback time is reached.
     public func onPlaybackTime(_ time: TimeInterval, queue: DispatchQueue?, execute block: @escaping () -> Void) -> Any {
-        return addTimeObserver(interval: 0.01, queue: queue) { [weak self] in
-            guard let self = self else { return }
+        let timer = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
+        timer.schedule(deadline: .now(), repeating: 0.01, leeway: .milliseconds(1))
+
+        timer.setEventHandler { [weak self] in
+            guard let self else {
+                timer.cancel()
+                return
+            }
+
             let ct = self.currentTime
-            if ct >= time && ct <= time + 0.1 {  block() }
+            if ct >= time && ct <= time + 0.1 { block() }
         }
+
+        timer.activate()
+        return timer
     }
     
 }
