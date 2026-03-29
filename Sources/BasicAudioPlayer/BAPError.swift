@@ -7,10 +7,18 @@
 //
 
 public enum BAPError: Error {
+/// Errors that can occur during BAPlayer operations.
     
+    /// The rendering region has invalid start time or duration.
     case renderingInvalidRegionBounds
+    
+    /// No audio file is loaded to render.
     case renderingNoSourceLoaded
+    
+    /// The PCM buffer for offline rendering could not be allocated.
     case renderingBufferCreationFailed
+    
+    /// An unspecified error occurred during offline rendering.
     case renderingUnknownError
     
     public var description: String {

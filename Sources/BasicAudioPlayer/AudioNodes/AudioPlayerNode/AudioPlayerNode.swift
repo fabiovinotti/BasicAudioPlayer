@@ -70,6 +70,8 @@ public class AudioPlayerNode {
     
     /// The playback point within the timeline of the loaded audio file, in seconds.
     ///
+    /// - Important: The underlying AVAudioPlayerNode must be attached to an engine
+    ///   for this property to return meaningful values during playback.
     public var currentTime: TimeInterval {
         let currentTime: TimeInterval
         

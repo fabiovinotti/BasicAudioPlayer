@@ -8,14 +8,21 @@
 
 import Foundation
 
-/// A protocol that describes the methods to responds to playback events.
+/// A protocol for responding to ``AudioPlayerNode`` playback events.
 public protocol AudioPlayerNodeDelegate: AnyObject {
     
-    /// Called by the audio player node when its status changes.
+    /// Called when the player node's status changes.
+    ///
+    /// - Parameters:
+    ///   - node: The player node whose status changed.
+    ///   - oldStatus: The status before the change.
+    ///   - newStatus: The current status.
     func playerNodeStatusDidChange(_ node: AudioPlayerNode,
                                    from oldStatus: AudioPlayerNode.Status,
                                    to newStatus: AudioPlayerNode.Status)
     
-    /// Called by the playerNode when the playback is completed.
+    /// Called when the scheduled audio has been completely played back.
+    ///
+    /// - Parameter node: The player node that completed playback.
     func playerNodePlaybackDidComplete(_ node: AudioPlayerNode)
 }

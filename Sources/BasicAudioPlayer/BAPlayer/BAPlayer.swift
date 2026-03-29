@@ -19,28 +19,38 @@ public class BAPlayer {
     
     // MARK: - Properties
     
+    /// The audio engine that drives playback and rendering.
     public let engine = AVAudioEngine()
+    
+    /// The player node responsible for scheduling and playing audio data.
     public let playerNode = AudioPlayerNode()
     
     public typealias Status = AudioPlayerNode.Status
-    /// The status of the underlying audio player node. It provides information about the playback status.
+    
+    /// The status of the underlying audio player node.
     public var status: AudioPlayerNode.Status {
         playerNode.status
     }
     
+    /// The currently loaded audio file, or `nil` if none is loaded.
     public var file: AVAudioFile? {
         playerNode.file
     }
     
+    /// The current playback time, in seconds.
+    ///
+    /// Setting this property seeks to the specified time.
     public var currentTime: TimeInterval {
         get { playerNode.currentTime }
         set { playerNode.seek(to: newValue) }
     }
     
+    /// The total duration of the loaded audio file, in seconds.
     public var duration: TimeInterval {
         playerNode.duration
     }
     
+    /// Whether playback restarts when it reaches the end.
     public var doesLoop: Bool {
         get { playerNode.doesLoop }
         set { playerNode.doesLoop = newValue }
@@ -48,23 +58,27 @@ public class BAPlayer {
     
     /// All audio units added to the player.
     ///
-    /// The order of the audio units in this array reflects the connection order.
-    /// The source node of the first unit is the player node, the destination node
-    /// of the last unit is the engine's main mixer node.
-    public private(set) var audioUnits: [AVAudioUnit] = .init()
+    /// The order reflects the signal chain: the source node of the first unit
+    /// is the player node; the destination node of the last unit is the
+    /// engine's main mixer node.
+    public private(set) var audioUnits: [AVAudioUnit] = []
     
     /// A closure executed when the player node status changes.
     private var onStatusChangeHandler: ((Status) -> Void)?
     
     // MARK: - Creating a Player
     
-    /// Creates a player and load the file at the specified URL.
+    /// Creates a player and loads the file at the specified URL.
+    ///
+    /// - Parameter fileURL: The URL of the audio file to load.
     public convenience init(url fileURL: URL) throws {
         let f = try AVAudioFile(forReading: fileURL)
         self.init(file: f)
     }
     
-    /// Creates a player and load the specified file.
+    /// Creates a player and loads the specified file.
+    ///
+    /// - Parameter file: The audio file to load.
     public convenience init(file: AVAudioFile) {
         self.init()
         load(file: file)
@@ -82,11 +96,23 @@ public class BAPlayer {
     
     // MARK: - Loading Audio Files
     
+    /// Loads an audio file from the given URL.
+    ///
+    /// Stops any current playback, reconfigures the audio graph, and
+    /// prepares the engine for playback.
+    ///
+    /// - Parameter fileURL: The URL of the audio file to load.
     public func load(url fileURL: URL) throws {
         let f = try AVAudioFile(forReading: fileURL)
         load(file: f)
     }
     
+    /// Loads an audio file for playback.
+    ///
+    /// Stops any current playback, reconfigures the audio graph, and
+    /// prepares the engine for playback.
+    ///
+    /// - Parameter file: The audio file to load.
     public func load(file: AVAudioFile) {
         stop()
         playerNode.load(file: file)
@@ -97,6 +123,10 @@ public class BAPlayer {
     
     // MARK: - Controlling Playback
     
+    /// Starts or resumes playback.
+    ///
+    ///
+    /// - Parameter when: The `AVAudioTime` at which to start playback, or `nil` for immediately.
     public func play(at when: AVAudioTime? = nil) {
         guard status != .noSource else {
             log.info("Failed to play: No audio file is loaded.")
@@ -114,6 +144,9 @@ public class BAPlayer {
         playerNode.play(at: when)
     }
     
+    /// Pauses playback and the audio engine.
+    ///
+    /// Does nothing if the player is not currently playing.
     public func pause() {
         guard status == .playing else {
             log.info("Couldn't pause the player: the player is not playing.")
@@ -124,9 +157,9 @@ public class BAPlayer {
         engine.pause()
     }
     
-    /// Stops the playback and removes any scheduled events.
+    /// Stops playback and the audio engine, removing any scheduled events.
     ///
-    /// This method does nothing when no audio file is loaded.
+    /// Does nothing when no audio file is loaded.
     public func stop() {
         guard status != .noSource else {
             log.info("Couldn't stop the player: the player is already stopped.")
@@ -139,9 +172,13 @@ public class BAPlayer {
     
     // MARK: - Managing Audio Units
     
-    /// Add an audio unit to the player.
+    /// Adds an audio unit to the end of the signal chain.
     ///
-    /// The unit will be placed at the end of the audio unit chain.
+    /// Stops playback while reconfiguring the audio graph. If a file is loaded,
+    /// the new unit is connected between the previous last node and the main
+    /// mixer node.
+    ///
+    /// - Parameter unit: The audio unit to add.
     public func addAudioUnit(_ unit: AVAudioUnit) {
         stop()
         
@@ -174,15 +211,13 @@ public class BAPlayer {
     
     // MARK: - Managing Connections
     
-    /// Disconnects all audio nodes and then connects them.
+    /// Disconnects all audio nodes and then reconnects them.
     private func redoConnections() {
         disconnectNodes()
         connectNodes()
     }
     
-    /// Removes all connections.
-    ///
-    /// BAPlayer calls this method when all nodes need to be disconnected.
+    /// Removes all connections between audio nodes.
     private func disconnectNodes() {
         engine.disconnectNodeInput(engine.outputNode)
         engine.disconnectNodeInput(engine.mainMixerNode)
@@ -192,9 +227,7 @@ public class BAPlayer {
         }
     }
     
-    /// Connects all audio nodes.
-    ///
-    /// BAPlayer calls this method when all nodes need to be connected.
+    /// Connects all audio nodes in the signal chain.
     private func connectNodes() {
         guard let format = file?.processingFormat else {
             log.error("Failed to connect audio nodes: no audio file is loaded.")
@@ -224,7 +257,11 @@ public class BAPlayer {
     
     // MARK: - Handling Events
 
-    /// Adds an action to perform when the player status changes.
+    /// Registers a closure to be called when the player status changes.
+    ///
+    /// Pass `nil` to remove a previously registered handler.
+    ///
+    /// - Parameter action: The closure to execute, receiving the new status.
     public func onStatusChange(perform action: ((Status) -> Void)? = nil) {
         onStatusChangeHandler = action
     }
