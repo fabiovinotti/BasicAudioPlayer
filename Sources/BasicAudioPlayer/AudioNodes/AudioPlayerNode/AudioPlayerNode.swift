@@ -40,15 +40,35 @@ public class AudioPlayerNode {
     }
     
     /// The playback segment's lower bound, in seconds.
+    ///
+    /// The value is clamped to `0...duration`. Setting a value greater than
+    /// ``segmentEnd`` is ignored.
     public var segmentStart: TimeInterval {
         get { _playbackSegment.lowerBound }
-        set { playbackSegment = newValue...segmentEnd }
+        set {
+            let clamped = max(0, min(newValue, duration))
+            guard clamped <= segmentEnd else {
+                log.error("Failed to set segment start: \(clamped) exceeds segment end (\(segmentEnd)).")
+                return
+            }
+            _playbackSegment = clamped...segmentEnd
+        }
     }
     
     /// The playback segment's upper bound, in seconds.
+    ///
+    /// The value is clamped to `0...duration`. Setting a value less than
+    /// ``segmentStart`` is ignored.
     public var segmentEnd: TimeInterval {
         get { _playbackSegment.upperBound }
-        set { playbackSegment = segmentStart...newValue }
+        set {
+            let clamped = max(0, min(newValue, duration))
+            guard clamped >= segmentStart else {
+                log.error("Failed to set segment end: \(clamped) is below segment start (\(segmentStart)).")
+                return
+            }
+            _playbackSegment = segmentStart...clamped
+        }
     }
     
     private var _playbackSegment: ClosedRange<TimeInterval> = 0...0
