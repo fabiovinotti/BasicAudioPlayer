@@ -19,9 +19,11 @@ extension BAPlayer {
     
     /// Renders the specified portion of the player's audio to an AVAudioFile.
     ///
-    /// - parameter destinationFile: The rendering operation output file. Initialize it for writing.
-    /// - parameter region: The audio region to render.
-    /// - parameter progressHandler: A closure called every time the rendering progresses.
+    /// - Parameters:
+    ///   - destinationFile: The output file, initialized for writing.
+    ///   - region: The closed time range (in seconds) to render.
+    ///   - progressHandler: A closure called with a value in `0.0...1.0` as rendering progresses.
+    /// - Throws: ``BAPError`` if no source is loaded, region is invalid, or rendering fails.
     ///
     public func render(to destinationFile: AVAudioFile,
                        region: ClosedRange<TimeInterval>,
@@ -37,10 +39,16 @@ extension BAPlayer {
     
     /// Renders the player's audio to an AVAudioFile.
     ///
-    /// - parameter destinationFile: The rendering operation output file. Initialize it for writing.
-    /// - parameter startTime: The starting point of the rendering.
-    /// - parameter duration: The number of seconds to render. Leave it nil to render to the end of the file.
-    /// - parameter progressHandler: A closure called every time the rendering progresses.
+    /// Stops any current playback and puts the engine into offline manual-rendering
+    /// mode for the duration of the operation. After rendering, the engine is stopped
+    /// and returned to normal mode.
+    ///
+    /// - Parameters:
+    ///   - destinationFile: The output file, initialized for writing.
+    ///   - startTime: The starting point of the rendering, in seconds. Defaults to `0`.
+    ///   - duration: The number of seconds to render. Pass `nil` to render to the end of the file.
+    ///   - progressHandler: A closure called with a value in `0.0...1.0` as rendering progresses.
+    /// - Throws: ``BAPError`` if no source is loaded, region is invalid, or rendering fails.
     ///
     public func render(to destinationFile: AVAudioFile,
                        startTime: TimeInterval = 0,

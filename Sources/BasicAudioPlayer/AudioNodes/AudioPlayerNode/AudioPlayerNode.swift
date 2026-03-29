@@ -16,35 +16,36 @@ public class AudioPlayerNode {
     /// Whether the playback should restart once completed.
     public var doesLoop: Bool = false
     
-    /// The number of seconds required to completely play the loaded audio file.
+    /// The total playback duration of the loaded audio file, in seconds.
     ///
-    /// - returns: The total playback duration of the loaded audio file or 0 if no file has been loaded yet.
+    /// Returns `0` if no file has been loaded.
     public var duration: TimeInterval {
         file?.duration ?? 0
     }
     
-    public weak var delegate: AudioPlayerNodeDelegate? = nil
+    /// The delegate that receives playback events.
+    public weak var delegate: AudioPlayerNodeDelegate?
     
     /// The underlying AVAudioPlayerNode.
     ///
     /// Interacting with it directly could cause the wrapper to behave unpredictably.
     public private(set) var node = AVAudioPlayerNode()
     
-    /// The bus’s input volume.
+    /// The bus's input volume.
     ///
-    /// The range of valid values is 0.0 to 1.0
+    /// The range of valid values is 0.0 to 1.0.
     public var volume: Float {
         get { node.volume }
         set { node.volume = newValue }
     }
     
-    /// The playback segment's lower bound.
+    /// The playback segment's lower bound, in seconds.
     public var segmentStart: TimeInterval {
         get { _playbackSegment.lowerBound }
         set { playbackSegment = newValue...segmentEnd }
     }
     
-    /// The playback segment's upper bound.
+    /// The playback segment's upper bound, in seconds.
     public var segmentEnd: TimeInterval {
         get { _playbackSegment.upperBound }
         set { playbackSegment = segmentStart...newValue }
@@ -67,9 +68,8 @@ public class AudioPlayerNode {
         }
     }
     
-    /// The playback point within the timeline of the track associated with the player measured in seconds.
+    /// The playback point within the timeline of the loaded audio file, in seconds.
     ///
-    /// Accessing this property when the underlying AVAudioPlayerNode is not attached to an engine will raise errors.
     public var currentTime: TimeInterval {
         let currentTime: TimeInterval
         
@@ -86,6 +86,7 @@ public class AudioPlayerNode {
         return min(currentTime, duration)
     }
     
+    /// The current playback status.
     public private(set) var status: Status = .noSource {
         didSet {
             delegate?.playerNodeStatusDidChange(self, from: oldValue, to: status)
@@ -93,14 +94,11 @@ public class AudioPlayerNode {
     }
     
     /// The loaded audio file.
-    public private(set) var file: AVAudioFile? = nil
+    public private(set) var file: AVAudioFile?
     
-    /// The sample time offset.
-    ///
-    /// When AVAudioPlayerNode starts playing after a scheduling event its sample time is not 0 as expected.
-    /// This property is used to store the sample time offset, so that it can be used to correctly calculate
-    /// the current playback time.
-    private var sampleTimeOffset: AVAudioFramePosition? = nil
+    /// When AVAudioPlayerNode starts playing after a scheduling event its sample time
+    /// is not 0 as expected. This offset is subtracted when computing ``currentTime``.
+    private var sampleTimeOffset: AVAudioFramePosition?
     
     /// The playback time elapsed before pausing or stopping the node.
     private var timeElapsedBeforeStop: TimeInterval = 0
@@ -118,15 +116,27 @@ public class AudioPlayerNode {
     
     // MARK: - Creating a Player Node
     
-    public init() {} // Make the initializer accessible from any module that imports BasicAudioPlayer
+    public init() {}
     
     // MARK: - Loading Audio Files
     
+    /// Loads an audio file from the given URL.
+    ///
+    /// If the player is currently playing or paused, it is stopped first.
+    ///
+    /// - Parameter fileURL: The URL of the audio file to load.
+    /// - Throws: An error if the file cannot be read.
     public func load(url fileURL: URL) throws {
         let f = try AVAudioFile(forReading: fileURL)
         load(file: f)
     }
     
+    /// Loads an audio file for playback.
+    ///
+    /// If the player is currently playing or paused, it is stopped first.
+    /// The playback segment is reset to cover the full duration of the file.
+    ///
+    /// - Parameter file: The audio file to load.
     public func load(file: AVAudioFile) {
         if status == .playing || status == .paused {
             stop()
@@ -146,10 +156,12 @@ public class AudioPlayerNode {
     /// the scheduling is performed automatically before starting playback.
     /// However, you can schedule a segment manually using this function.
     ///
-    /// When no segment is specified on call, the segmentStart and segmentEnd properties are used instead.
+    /// When no segment is specified, the current ``segmentStart`` and
+    /// ``segmentEnd`` properties are used.
     ///
-    /// - parameter segment: A range indicating the segment starting and ending time.
-    /// - parameter time: The time the segment plays.
+    /// - Parameters:
+    ///   - segment: A range indicating the segment start and end times.
+    ///   - time: The `AVAudioTime` at which the segment should play.
     public func schedule(segment: ClosedRange<TimeInterval>? = nil, at time: AVAudioTime? = nil) {
         guard let file = file else {
             log.error("Scheduling failed: no audio file to schedule.")
@@ -189,6 +201,17 @@ public class AudioPlayerNode {
     
     // MARK: - Controlling Playback
     
+    /// Starts or resumes playback.
+    ///
+    /// If scheduling is needed, it is performed automatically. If the playback
+    /// position is at the end of the track, the segment resets to the beginning.
+    ///
+    /// Playback requires that:
+    /// - An audio file is loaded.
+    /// - The node is attached to an engine.
+    /// - The engine is running.
+    ///
+    /// - Parameter when: The `AVAudioTime` at which to start playback, or `nil` for immediately.
     public func play(at when: AVAudioTime? = nil) {
         guard file != nil else {
             log.error("Failed to play. No audio file is loaded.")
@@ -222,6 +245,9 @@ public class AudioPlayerNode {
         status = .playing
     }
     
+    /// Pauses playback without removing scheduled events.
+    ///
+    /// Does nothing if the player is not currently playing.
     public func pause() {
         guard status == .playing else { return }
         timeElapsedBeforeStop = currentTime
@@ -230,6 +256,8 @@ public class AudioPlayerNode {
     }
     
     /// Stops playback and removes any scheduled events.
+    ///
+    /// Does nothing when no audio file is loaded.
     public func stop() {
         guard status != .noSource else { return }
         
@@ -244,11 +272,13 @@ public class AudioPlayerNode {
         needsScheduling = true
     }
     
-    /// Sets the current playback time.
+    /// Seeks to the specified playback time.
     ///
-    /// The scheduled segment is modified when this function is called. It's new value will be time...duration.
+    /// The playback segment is updated to `time...duration`. If the player is
+    /// playing, playback restarts from the new position. If paused, the player
+    /// transitions to the stopped (ready) state.
     ///
-    /// - parameter time: The time to which to seek.
+    /// - Parameter time: The time to seek to, clamped to `0...duration`.
     public func seek(to time: TimeInterval) {
         guard let f = file else {
             log.error("Failed to seek: no audio file is loaded.")

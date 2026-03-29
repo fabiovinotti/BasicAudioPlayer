@@ -10,8 +10,8 @@ import Foundation
 
 extension AudioPlayerNode {
     
-    /// The operations that a player node might undertake.
-    public enum Status {
+    /// The playback state of an ``AudioPlayerNode``.
+    public enum Status: Sendable, Hashable {
         
         /// The player has no audio source to play.
         case noSource

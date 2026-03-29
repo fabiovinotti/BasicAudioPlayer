@@ -20,6 +20,9 @@ extension BAPlayer {
         return t
     }
     
+    /// Removes a previously added time observer.
+    ///
+    /// - Parameter observer: The opaque token returned by ``addTimeObserver(interval:queue:block:)``.
     public func removeTimeObserver(_ observer: Any) {
         guard let o = observer as? DispatchSourceTimer else {
             log.info("Failed to remove observer: invalid parameter.")
