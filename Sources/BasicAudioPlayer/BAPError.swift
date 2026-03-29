@@ -6,8 +6,10 @@
 //  Licensed under MIT License.
 //
 
-public enum BAPError: Error {
+import Foundation
+
 /// Errors that can occur during BAPlayer operations.
+public enum BAPError: LocalizedError, Sendable {
     
     /// The rendering region has invalid start time or duration.
     case renderingInvalidRegionBounds
@@ -21,7 +23,7 @@ public enum BAPError: Error {
     /// An unspecified error occurred during offline rendering.
     case renderingUnknownError
     
-    public var description: String {
+    public var errorDescription: String? {
         switch self {
         case .renderingInvalidRegionBounds:
             return "The rendering region bounds are invalid"
