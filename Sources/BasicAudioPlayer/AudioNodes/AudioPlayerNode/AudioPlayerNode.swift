@@ -343,12 +343,6 @@ public class AudioPlayerNode {
         
         node.stop()
         needsScheduling = true
-        
-        if !doesLoop {
-            // Position at the end of segment so currentTime reports the end.
-            _playbackSegment = segmentEnd...segmentEnd
-        }
-        
         status = .ready
         delegate?.playerNodePlaybackDidComplete(self)
         
