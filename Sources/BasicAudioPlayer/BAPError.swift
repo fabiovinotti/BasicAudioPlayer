@@ -38,5 +38,10 @@ public enum BAPError: LocalizedError {
             return "A problem occurred during rendering and resulted in no data being returned"
         }
     }
-    
+
+    @available(*, deprecated)
+    public var description: String {
+        return errorDescription ?? ""
+    }
+
 }
