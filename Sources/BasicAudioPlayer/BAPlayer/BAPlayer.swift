@@ -284,9 +284,6 @@ extension BAPlayer: AudioPlayerNodeDelegate {
     }
 
     public func playerNodePlaybackDidComplete(_ node: AudioPlayerNode) {
-        playerNode.segmentStart = duration
-        playerNode.segmentEnd = playerNode.duration
-
         if !doesLoop {
             engine.stop()
         }

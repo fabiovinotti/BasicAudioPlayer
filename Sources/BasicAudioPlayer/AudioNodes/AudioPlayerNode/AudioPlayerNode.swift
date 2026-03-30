@@ -259,7 +259,7 @@ public class AudioPlayerNode {
         
         if needsScheduling {
             // If the position is at the end, reset to the beginning of the track.
-            if segmentStart >= duration && duration > 0 {
+            if segmentStart == segmentEnd {
                 playbackSegment = 0...duration
             }
             schedule()
@@ -342,9 +342,16 @@ public class AudioPlayerNode {
         }
         
         node.stop()
-        status = .ready
         needsScheduling = true
+        
+        if !doesLoop {
+            // Position at the end of segment so currentTime reports the end.
+            _playbackSegment = segmentEnd...segmentEnd
+        }
+        
+        status = .ready
         delegate?.playerNodePlaybackDidComplete(self)
+        
         if doesLoop { play() }
     }
 }
