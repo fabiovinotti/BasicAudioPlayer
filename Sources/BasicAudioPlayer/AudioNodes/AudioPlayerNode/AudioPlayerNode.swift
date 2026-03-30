@@ -135,11 +135,14 @@ public class AudioPlayerNode {
     /// the scheduling is performed automatically before starting playback.
     public private(set) var needsScheduling: Bool = true
     
-    /// Whether to block the next execution of the internal completion handler.
+    /// Thread-safe flag used to suppress the next completion handler invocation.
     ///
-    /// This function is reset to false when a completion handler is actually blocked.
+    /// `stop()` and `seek()` set this flag on the main thread, while
+    /// `consumeCompletionBlock()` reads it on an internal audio thread.
+    /// The lock ensures mutual exclusion and memory visibility across threads.
+    private let completionLock = NSLock()
     private var blocksNextCompletionHandler: Bool = false
-    
+
     // MARK: - Creating a Player Node
     
     public init() {}
@@ -213,9 +216,7 @@ public class AudioPlayerNode {
             frameCount: frameCount,
             at: time,
             completionCallbackType: .dataPlayedBack) { [weak self] _ in
-                Task { [weak self] in
-                    await self?.playbackCompletionHandler()
-                }
+                self?.playbackCompletionHandler()
             }
         
         node.prepare(withFrameCount: frameCount)
@@ -296,7 +297,7 @@ public class AudioPlayerNode {
             return
         }
         
-        blocksNextCompletionHandler = true
+        setCompletionBlock()
         node.stop()
         status = .ready
         needsScheduling = true
@@ -327,25 +328,48 @@ public class AudioPlayerNode {
         } else if status == .paused {
             stop()
         } else if status == .ready && !needsScheduling {
-            blocksNextCompletionHandler = true
+            setCompletionBlock()
             node.stop()
             needsScheduling = true
         }
     }
-    
+
+    // MARK: - Private
+
     /// Executed when the scheduled audio has been completely played.
-    @MainActor
+    ///
+    /// Called on an internal audio thread. The completion-block flag is checked
+    /// synchronously to avoid a race window, then state mutations and delegate
+    /// callbacks are dispatched to the main thread.
     private func playbackCompletionHandler() {
-        guard !blocksNextCompletionHandler else {
-            blocksNextCompletionHandler = false
-            return
+        guard !consumeCompletionBlock() else { return }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            node.stop()
+            needsScheduling = true
+            status = .ready
+            delegate?.playerNodePlaybackDidComplete(self)
+            
+            if doesLoop { play() }
         }
-        
-        node.stop()
-        needsScheduling = true
-        status = .ready
-        delegate?.playerNodePlaybackDidComplete(self)
-        
-        if doesLoop { play() }
     }
+
+    private func setCompletionBlock() {
+        completionLock.lock()
+        blocksNextCompletionHandler = true
+        completionLock.unlock()
+    }
+
+    /// Atomically checks and resets the completion-block flag.
+    /// Returns `true` if the flag was set (meaning the handler should be skipped).
+    private func consumeCompletionBlock() -> Bool {
+        completionLock.lock()
+        defer { completionLock.unlock() }
+        let value = blocksNextCompletionHandler
+        blocksNextCompletionHandler = false
+        return value
+    }
+
 }
