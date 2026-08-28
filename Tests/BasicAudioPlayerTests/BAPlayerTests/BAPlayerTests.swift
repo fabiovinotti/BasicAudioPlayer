@@ -126,6 +126,46 @@ class BAPlayerTests: XCTestCase {
         XCTAssert(outputNode === engine.mainMixerNode)
     }
     
+    // MARK: - Test Graph Reconfiguration
+    
+    /// The engine may be started before any file is loaded. Loading a file must
+    /// stop it before reconfiguring the graph, or AVAudioEngine raises an exception.
+    func testLoadFile_WhileEngineIsRunningWithoutSource() throws {
+        let player = BAPlayer()
+        player.addAudioUnit(AVAudioUnitTimePitch())
+        
+        XCTAssertEqual(player.status, .noSource)
+        try startEngineWithoutSource(of: player)
+        
+        player.load(file: Self.audioFile)
+        try checksForLoad(player: player)
+    }
+    
+    /// Stopping the player must stop the engine even when it has no source,
+    /// otherwise the engine is left running with no way to stop it.
+    func testStop_WithoutSource_StopsEngine() throws {
+        let player = BAPlayer()
+        try startEngineWithoutSource(of: player)
+        
+        player.stop()
+        XCTAssertFalse(player.engine.isRunning)
+    }
+    
+    /// Starts the engine of a player that has no audio file loaded, the way a
+    /// client would when a play request arrives before a source is available.
+    private func startEngineWithoutSource(of player: BAPlayer) throws {
+        let engine = player.engine
+        
+        // A connected mixer is needed for the engine to have a renderable chain.
+        let node = AVAudioPlayerNode()
+        engine.attach(node)
+        engine.connect(node, to: engine.mainMixerNode, format: nil)
+        
+        engine.prepare()
+        try engine.start()
+        XCTAssertTrue(engine.isRunning)
+    }
+    
     // MARK: - Test onStatusChange
     
     func testOnStatusChange() {

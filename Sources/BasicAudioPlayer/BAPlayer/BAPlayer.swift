@@ -159,14 +159,13 @@ public class BAPlayer {
     
     /// Stops playback and the audio engine, removing any scheduled events.
     ///
-    /// Does nothing when no audio file is loaded.
+    /// The engine is stopped even when no audio file is loaded, since it may
+    /// have been started before a source was available.
     public func stop() {
-        guard status != .noSource else {
-            log.info("Couldn't stop the player: the player is already stopped.")
-            return
+        if status != .noSource {
+            playerNode.stop()
         }
         
-        playerNode.stop()
         engine.stop()
     }
     
@@ -213,6 +212,12 @@ public class BAPlayer {
     
     /// Disconnects all audio nodes and then reconnects them.
     private func redoConnections() {
+        // AVAudioEngine raises an exception when the graph of a running engine
+        // is reconfigured, so the engine is stopped before touching connections.
+        if engine.isRunning {
+            engine.stop()
+        }
+        
         disconnectNodes()
         connectNodes()
     }

@@ -74,6 +74,15 @@ extension BAPlayer {
             maximumFrameCount: 4096
         )
         
+        // The engine must be restored to online mode and stopped even if
+        // rendering fails partway through. Leaving it running would make any
+        // later reconfiguration of its graph raise an exception.
+        defer {
+            playerNode.stop()
+            engine.stop()
+            engine.disableManualRenderingMode()
+        }
+        
         playerNode.seek(to: startTime)
         playerNode.schedule()
         try engine.start()
@@ -113,10 +122,6 @@ extension BAPlayer {
                 fatalError("Unknown manual rendering status returned")
             }
         }
-        
-        playerNode.stop()
-        engine.stop()
-        engine.disableManualRenderingMode()
     }
     
 }
