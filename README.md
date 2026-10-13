@@ -133,6 +133,12 @@ try await Task.detached {
 
 `makeAudioUnits` is called once per render. Capture plain values in it, not units that are in use somewhere else.
 
+## Demo App
+
+`Examples/BasicAudioPlayerDemo` is an iOS and macOS app that exercises the package: playback controls, seeking, looping, a live time-pitch unit, and offline rendering with `BAOfflineRenderer`. It references the package locally, so changes to `Sources/` show up the next time you run it.
+
+Open `Examples/BasicAudioPlayerDemo/BasicAudioPlayerDemo.xcodeproj`, choose your development team in the target's Signing & Capabilities, and run.
+
 ## License
 
 BasicAudioPlayer is available under the MIT license. See the LICENSE file for more info.
