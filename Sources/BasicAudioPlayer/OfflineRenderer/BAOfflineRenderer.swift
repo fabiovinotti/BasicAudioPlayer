@@ -96,6 +96,10 @@ public struct BAOfflineRenderer: Sendable {
     ///
     /// When called from a task, cancellation is checked between chunks.
     ///
+    /// If rendering is cancelled or fails partway through, the chunks already
+    /// written stay in `destinationFile`. Delete the file if a truncated render
+    /// is of no use.
+    ///
     /// - Parameters:
     ///   - destinationFile: The output file, initialized for writing.
     ///   - progressHandler: Called on the caller's thread after each chunk.
@@ -108,17 +112,6 @@ public struct BAOfflineRenderer: Sendable {
     ) throws {
 
         let source = try AVAudioFile(forReading: configuration.sourceURL)
-        let startFrame = AVAudioFramePosition(
-            (configuration.sourceStartTime * source.processingFormat.sampleRate).rounded()
-        )
-
-        guard configuration.sourceStartTime >= 0,
-              configuration.outputDuration > 0,
-              startFrame < source.length
-        else {
-            throw BAPError.renderingInvalidRegionBounds
-        }
-
         let engine = AVAudioEngine()
 
         try engine.enableManualRenderingMode(
@@ -126,6 +119,22 @@ public struct BAOfflineRenderer: Sendable {
             format: destinationFile.processingFormat,
             maximumFrameCount: configuration.maximumFrameCount
         )
+
+        let startFrames = (configuration.sourceStartTime * source.processingFormat.sampleRate).rounded()
+        let outputFrames = (configuration.outputDuration * engine.manualRenderingFormat.sampleRate).rounded()
+
+        // Checked before converting to frame positions: converting NaN, an
+        // infinity or an out-of-range value to an integer would crash.
+        guard startFrames >= 0,
+              startFrames < Double(source.length),
+              configuration.outputDuration > 0,
+              outputFrames < Double(AVAudioFramePosition.max)
+        else {
+            throw BAPError.renderingInvalidRegionBounds
+        }
+
+        let startFrame = AVAudioFramePosition(startFrames)
+        let totalFrames = AVAudioFramePosition(outputFrames)
 
         let playerNode = AVAudioPlayerNode()
         playerNode.pan = configuration.pan
@@ -155,10 +164,6 @@ public struct BAOfflineRenderer: Sendable {
         ) else {
             throw BAPError.renderingBufferCreationFailed
         }
-
-        let totalFrames = AVAudioFramePosition(
-            (configuration.outputDuration * engine.manualRenderingFormat.sampleRate).rounded()
-        )
 
         while engine.manualRenderingSampleTime < totalFrames {
             try Task.checkCancellation()
