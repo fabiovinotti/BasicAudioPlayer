@@ -95,6 +95,10 @@ public struct BAOfflineRenderer: Sendable {
     ///
     /// When called from a task, cancellation is checked between chunks.
     ///
+    /// If rendering is cancelled or fails partway through, the chunks already
+    /// written stay in `destinationFile`. Delete the file if a truncated render
+    /// is of no use.
+    ///
     /// - Parameters:
     ///   - destinationFile: The output file, initialized for writing.
     ///   - progressHandler: Called on the caller's thread after each chunk.
