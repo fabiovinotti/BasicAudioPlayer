@@ -105,16 +105,22 @@ public struct BAOfflineRenderer: Sendable {
                        progressHandler: ProgressHandler? = nil) throws {
 
         let source = try AVAudioFile(forReading: configuration.sourceURL)
-        let startFrame = AVAudioFramePosition(
-            (configuration.sourceStartTime * source.processingFormat.sampleRate).rounded()
-        )
+        let startFrames = (configuration.sourceStartTime * source.processingFormat.sampleRate).rounded()
+        // The output is rendered at the destination's rate, the engine's manual rendering rate.
+        let outputFrames = (configuration.outputDuration * destinationFile.processingFormat.sampleRate).rounded()
 
-        guard configuration.sourceStartTime >= 0,
+        // Checked before converting to frame positions: converting NaN, an
+        // infinity or an out-of-range value to an integer would crash.
+        guard startFrames >= 0,
+              startFrames < Double(source.length),
               configuration.outputDuration > 0,
-              startFrame < source.length
+              outputFrames < Double(AVAudioFramePosition.max)
         else {
             throw BAPError.renderingInvalidRegionBounds
         }
+
+        let startFrame = AVAudioFramePosition(startFrames)
+        let totalFrames = AVAudioFramePosition(outputFrames)
 
         let engine = AVAudioEngine()
 
@@ -146,10 +152,6 @@ public struct BAOfflineRenderer: Sendable {
         ) else {
             throw BAPError.renderingBufferCreationFailed
         }
-
-        let totalFrames = AVAudioFramePosition(
-            (configuration.outputDuration * engine.manualRenderingFormat.sampleRate).rounded()
-        )
 
         while engine.manualRenderingSampleTime < totalFrames {
             try Task.checkCancellation()

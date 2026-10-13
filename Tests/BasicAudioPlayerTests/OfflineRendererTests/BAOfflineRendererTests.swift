@@ -142,6 +142,37 @@ class BAOfflineRendererTests: XCTestCase {
         }
     }
 
+    func testRender_nonFiniteStartTime_throwsInvalidRegionBounds() throws {
+        for startTime in [TimeInterval.nan, .infinity, -.infinity, 1e300] {
+            let configuration = BAOfflineRenderer.Configuration(
+                sourceURL: Self.sourceURL,
+                sourceStartTime: startTime,
+                outputDuration: 1
+            )
+
+            XCTAssertThrowsError(try render(configuration), "Start time: \(startTime)") { error in
+                guard case BAPError.renderingInvalidRegionBounds = error else {
+                    return XCTFail("Unexpected error: \(error)")
+                }
+            }
+        }
+    }
+
+    func testRender_nonFiniteDuration_throwsInvalidRegionBounds() throws {
+        for duration in [TimeInterval.nan, .infinity, 1e300] {
+            let configuration = BAOfflineRenderer.Configuration(
+                sourceURL: Self.sourceURL,
+                outputDuration: duration
+            )
+
+            XCTAssertThrowsError(try render(configuration), "Duration: \(duration)") { error in
+                guard case BAPError.renderingInvalidRegionBounds = error else {
+                    return XCTFail("Unexpected error: \(error)")
+                }
+            }
+        }
+    }
+
     // MARK: - Helpers
 
     /// Renders to ``destinationURL`` and closes the file.
