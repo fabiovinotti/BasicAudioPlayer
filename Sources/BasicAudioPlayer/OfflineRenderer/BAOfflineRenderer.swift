@@ -109,9 +109,16 @@ public struct BAOfflineRenderer: Sendable {
                        progressHandler: ProgressHandler? = nil) throws {
 
         let source = try AVAudioFile(forReading: configuration.sourceURL)
+        let engine = AVAudioEngine()
+
+        try engine.enableManualRenderingMode(
+            .offline,
+            format: destinationFile.processingFormat,
+            maximumFrameCount: configuration.maximumFrameCount
+        )
+
         let startFrames = (configuration.sourceStartTime * source.processingFormat.sampleRate).rounded()
-        // The output is rendered at the destination's rate, the engine's manual rendering rate.
-        let outputFrames = (configuration.outputDuration * destinationFile.processingFormat.sampleRate).rounded()
+        let outputFrames = (configuration.outputDuration * engine.manualRenderingFormat.sampleRate).rounded()
 
         // Checked before converting to frame positions: converting NaN, an
         // infinity or an out-of-range value to an integer would crash.
@@ -125,14 +132,6 @@ public struct BAOfflineRenderer: Sendable {
 
         let startFrame = AVAudioFramePosition(startFrames)
         let totalFrames = AVAudioFramePosition(outputFrames)
-
-        let engine = AVAudioEngine()
-
-        try engine.enableManualRenderingMode(
-            .offline,
-            format: destinationFile.processingFormat,
-            maximumFrameCount: configuration.maximumFrameCount
-        )
 
         let playerNode = AVAudioPlayerNode()
         playerNode.pan = configuration.pan
