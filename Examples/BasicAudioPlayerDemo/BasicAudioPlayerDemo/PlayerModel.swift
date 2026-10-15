@@ -37,8 +37,10 @@ final class PlayerModel {
         // Units added before a file is loaded are connected on load.
         player.addAudioUnit(timePitch)
 
-        player.onStatusChange { [weak self] status in
-            Task { @MainActor in self?.status = status }
+        // Reads the status on arrival rather than using the one passed in: `load` and
+        // `refreshTime` also set it, and a late hop must not overwrite a newer value.
+        player.onStatusChange { [weak self] _ in
+            Task { @MainActor in self?.refreshStatus() }
         }
 
         timeObserver = player.addTimeObserver(interval: 0.1, queue: .main) { [weak self] in
@@ -56,20 +58,24 @@ final class PlayerModel {
         load(url: url)
     }
 
-    /// Loads a file, keeping security-scoped access to it until the next load,
+    /// Loads a file, keeping security-scoped access to it until the next successful load,
     /// since the offline renderer reopens the file by URL.
     func load(url: URL) {
-        securityScopedURL?.stopAccessingSecurityScopedResource()
-        securityScopedURL = url.startAccessingSecurityScopedResource() ? url : nil
+        let isAccessing = url.startAccessingSecurityScopedResource()
 
         do {
             try player.load(url: url)
+            // The previous file is no longer loaded, so its access can go.
+            securityScopedURL?.stopAccessingSecurityScopedResource()
+            securityScopedURL = isAccessing ? url : nil
             fileURL = url
             duration = player.duration
             currentTime = 0
-            status = player.status
+            refreshStatus()
             errorMessage = nil
         } catch {
+            // The previous file is still loaded; keep its access and drop the new one's.
+            if isAccessing { url.stopAccessingSecurityScopedResource() }
             errorMessage = error.localizedDescription
         }
     }
@@ -99,8 +105,12 @@ final class PlayerModel {
         currentTime = time
     }
 
-    private func refreshTime() {
+    private func refreshStatus() {
         status = player.status
+    }
+
+    private func refreshTime() {
+        refreshStatus()
         guard !isScrubbing else { return }
         currentTime = player.currentTime
     }

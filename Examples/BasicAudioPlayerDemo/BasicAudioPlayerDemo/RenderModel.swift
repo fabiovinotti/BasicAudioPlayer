@@ -7,6 +7,8 @@ import Observation
 final class RenderModel {
 
     @ObservationIgnored private var renderTask: Task<Void, Never>?
+    /// Identifies the running render, so late progress updates from an earlier one are ignored.
+    @ObservationIgnored private var renderID = UUID()
 
     var rate: Float = 2
     var sourceStartTime: TimeInterval = 0
@@ -20,8 +22,16 @@ final class RenderModel {
 
     var isRendering: Bool { progress != nil }
 
+    /// Renders from `sourceURL`, which is expected to be the file the player has loaded.
     func render(sourceURL: URL) {
-        renderTask?.cancel()
+        guard !isRendering else { return }
+
+        // Drop the previous output, unless it's the source and so loaded in the player.
+        if let previousURL = outputURL, previousURL != sourceURL {
+            try? FileManager.default.removeItem(at: previousURL)
+        }
+        outputURL = nil
+        renderDuration = nil
 
         let rate = rate
         let configuration = BAOfflineRenderer.Configuration(
@@ -38,6 +48,8 @@ final class RenderModel {
         let destinationURL = URL.temporaryDirectory
             .appending(path: "render-\(UUID().uuidString).caf")
 
+        let id = UUID()
+        renderID = id
         progress = 0
         errorMessage = nil
 
@@ -57,7 +69,7 @@ final class RenderModel {
                     // The handler runs once per chunk; only hop to the main actor for visible changes.
                     guard progress - reported >= 0.01 || progress == 1 else { return }
                     reported = progress
-                    Task { @MainActor in self.updateProgress(progress) }
+                    Task { @MainActor in self.updateProgress(progress, renderID: id) }
                 }
 
                 let elapsed = clock.now - start
@@ -76,8 +88,8 @@ final class RenderModel {
         renderTask?.cancel()
     }
 
-    private func updateProgress(_ value: Double) {
-        guard isRendering else { return }
+    private func updateProgress(_ value: Double, renderID id: UUID) {
+        guard isRendering, id == renderID else { return }
         progress = value
     }
 

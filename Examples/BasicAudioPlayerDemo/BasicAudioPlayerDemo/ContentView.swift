@@ -28,6 +28,15 @@ struct ContentView: View {
                 player.loadBundledSample()
             }
         }
+        .onChange(of: player.duration) {
+            // A start time kept from a longer file would fall past the end of this one.
+            renderer.sourceStartTime = min(renderer.sourceStartTime, maximumRenderStart)
+        }
+    }
+
+    /// The latest render start the source allows, keeping a second of it to render.
+    private var maximumRenderStart: TimeInterval {
+        max(player.duration - 1, 0)
     }
 
     // MARK: - Source
@@ -117,7 +126,7 @@ struct ContentView: View {
     private var renderSection: some View {
         Section {
             LabeledContent("Start \(formatted(renderer.sourceStartTime))") {
-                Slider(value: $renderer.sourceStartTime, in: 0...max(player.duration, 0.1))
+                Slider(value: $renderer.sourceStartTime, in: 0...max(maximumRenderStart, 0.1))
             }
             Stepper(
                 "Output length \(Int(renderer.outputDuration)) s",
