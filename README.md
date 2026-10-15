@@ -104,7 +104,7 @@ player.addAudioUnit(timePitchUnit)
 
 BAOfflineRenderer renders an audio file through a chain of audio units into another file, as fast as possible. Each render builds its own audio engine, so it never interrupts a BAPlayer that is playing.
 
-Rendering is synchronous, so call it from a background task to keep the main thread free. Inside a task, it stops with a `CancellationError` when the task is cancelled.
+Rendering is synchronous, so call it from a background task to keep the main thread free. Inside a task, it stops with a `CancellationError` when the task is cancelled. If rendering is cancelled or fails, whatever was already rendered stays in the destination file, so delete it if a partial render is of no use.
 
 ```Swift
 let rate: Float = 2
