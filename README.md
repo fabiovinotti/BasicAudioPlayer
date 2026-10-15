@@ -100,6 +100,39 @@ let timePitchUnit = AVAudioUnitTimePitch()
 player.addAudioUnit(timePitchUnit)
 ```
 
+### BAOfflineRenderer
+
+BAOfflineRenderer renders an audio file through a chain of audio units into another file, as fast as possible. Each render builds its own audio engine, so it never interrupts a BAPlayer that is playing.
+
+Rendering is synchronous, so call it from a background task to keep the main thread free. Inside a task, it stops with a `CancellationError` when the task is cancelled. If rendering is cancelled or fails, whatever was already rendered stays in the destination file, so delete it if a partial render is of no use.
+
+```Swift
+let rate: Float = 2
+
+let configuration = BAOfflineRenderer.Configuration(
+    sourceURL: audioFileURL,
+    sourceStartTime: 30,
+    // 10 seconds of source at 2× give 5 seconds of output.
+    outputDuration: 5,
+    makeAudioUnits: {
+        let timePitch = AVAudioUnitTimePitch()
+        timePitch.rate = rate
+        return [timePitch]
+    }
+)
+
+try await Task.detached {
+    let source = try AVAudioFile(forReading: audioFileURL)
+    let destination = try AVAudioFile(forWriting: outputURL, settings: source.processingFormat.settings)
+
+    try BAOfflineRenderer(configuration: configuration).render(to: destination) { progress in
+        print("Rendered \(Int(progress * 100))%")
+    }
+}.value
+```
+
+`makeAudioUnits` is called once per render. Capture plain values in it, not units that are in use somewhere else.
+
 ## License
 
 BasicAudioPlayer is available under the MIT license. See the LICENSE file for more info.
