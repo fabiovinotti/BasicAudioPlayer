@@ -25,6 +25,7 @@ extension BAPlayer {
     ///   - progressHandler: A closure called with a value in `0.0...1.0` as rendering progresses.
     /// - Throws: ``BAPError`` if no source is loaded, region is invalid, or rendering fails.
     ///
+    @available(*, deprecated, message: "Use BAOfflineRenderer, which renders on its own engine without stopping playback. Recreate the player's audio units in makeAudioUnits.")
     public func render(to destinationFile: AVAudioFile,
                        region: ClosedRange<TimeInterval>,
                        progressHandler: ProgressHandler? = nil) throws {
@@ -50,6 +51,7 @@ extension BAPlayer {
     ///   - progressHandler: A closure called with a value in `0.0...1.0` as rendering progresses.
     /// - Throws: ``BAPError`` if no source is loaded, region is invalid, or rendering fails.
     ///
+    @available(*, deprecated, message: "Use BAOfflineRenderer, which renders on its own engine without stopping playback. Recreate the player's audio units in makeAudioUnits.")
     public func render(to destinationFile: AVAudioFile,
                        startTime: TimeInterval = 0,
                        duration: TimeInterval? = nil,
