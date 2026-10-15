@@ -56,13 +56,14 @@ public struct BAOfflineRenderer: Sendable {
         ///   - pan: The pan of the player node, from -1 (left) to 1 (right).
         ///   - maximumFrameCount: The maximum number of frames rendered in one chunk.
         ///   - makeAudioUnits: Creates the audio units the source passes through.
-        public init(sourceURL: URL,
-                    sourceStartTime: TimeInterval = 0,
-                    outputDuration: TimeInterval,
-                    pan: Float = 0,
-                    maximumFrameCount: AVAudioFrameCount = 4096,
-                    makeAudioUnits: @escaping @Sendable () -> [AVAudioUnit] = { [] }) {
-
+        public init(
+            sourceURL: URL,
+            sourceStartTime: TimeInterval = 0,
+            outputDuration: TimeInterval,
+            pan: Float = 0,
+            maximumFrameCount: AVAudioFrameCount = 4096,
+            makeAudioUnits: @escaping @Sendable () -> [AVAudioUnit] = { [] }
+        ) {
             self.sourceURL = sourceURL
             self.sourceStartTime = sourceStartTime
             self.outputDuration = outputDuration
@@ -105,8 +106,10 @@ public struct BAOfflineRenderer: Sendable {
     /// - Throws: `CancellationError` if the current task is cancelled;
     ///   ``BAPError`` if the region is invalid or rendering fails; any error
     ///   thrown while reading the source or writing the destination.
-    public func render(to destinationFile: AVAudioFile,
-                       progressHandler: ProgressHandler? = nil) throws {
+    public func render(
+        to destinationFile: AVAudioFile,
+        progressHandler: ProgressHandler? = nil
+    ) throws {
 
         let source = try AVAudioFile(forReading: configuration.sourceURL)
         let engine = AVAudioEngine()
@@ -135,7 +138,13 @@ public struct BAOfflineRenderer: Sendable {
 
         let playerNode = AVAudioPlayerNode()
         playerNode.pan = configuration.pan
-        connect(playerNode, through: configuration.makeAudioUnits(), in: engine, format: source.processingFormat)
+
+        connect(
+            playerNode: playerNode,
+            through: configuration.makeAudioUnits(),
+            in: engine,
+            format: source.processingFormat
+        )
 
         playerNode.scheduleSegment(
             source,
@@ -181,10 +190,12 @@ public struct BAOfflineRenderer: Sendable {
     // MARK: - Private
 
     /// Attaches the nodes and connects them: player → units → main mixer.
-    private func connect(_ playerNode: AVAudioPlayerNode,
-                         through audioUnits: [AVAudioUnit],
-                         in engine: AVAudioEngine,
-                         format: AVAudioFormat) {
+    private func connect(
+        playerNode: AVAudioPlayerNode,
+        through audioUnits: [AVAudioUnit],
+        in engine: AVAudioEngine,
+        format: AVAudioFormat
+    ) {
 
         let chain: [AVAudioNode] = [playerNode] + audioUnits
 
