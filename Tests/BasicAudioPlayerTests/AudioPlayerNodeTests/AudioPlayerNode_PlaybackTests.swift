@@ -91,4 +91,39 @@ class AudioPlayerNode_PlaybackTests: XCTestCase {
         XCTAssertEqual(playerNode.status, .ready)
         XCTAssertFalse(playerNode.node.isPlaying)
     }
+
+    // MARK: - Delayed Start Tests
+
+    func testCurrentTime_BeforeDelayedStart_StaysAtSegmentStart() {
+        playerNode.load(file: audioFile)
+        playerNode.play(at: hostTime(secondsFromNow: 1))
+        wait(seconds: 0.5)
+        XCTAssertEqual(playerNode.currentTime, 0)
+    }
+
+    func testCurrentTime_AfterDelayedStart_CountsFromTheStartOfPlayback() {
+        playerNode.load(file: audioFile)
+        playerNode.play(at: hostTime(secondsFromNow: 0.5))
+        wait(seconds: 1)
+        XCTAssertEqual(playerNode.currentTime, 0.5, accuracy: 0.15)
+    }
+
+    func testCurrentTime_DelayedStartNearTheEnd_DoesNotReachTheEndEarly() {
+        // currentTime used to run ahead by the delay, so it reached the end
+        // of the file, and stopped there, while audio was still playing.
+        playerNode.load(file: audioFile)
+        playerNode.seek(to: audioFile.duration - 2)
+        playerNode.play(at: hostTime(secondsFromNow: 1))
+        wait(seconds: 2)
+        XCTAssertEqual(playerNode.currentTime, audioFile.duration - 1, accuracy: 0.15)
+    }
+
+    private func hostTime(secondsFromNow seconds: TimeInterval) -> AVAudioTime {
+        AVAudioTime(hostTime: mach_absolute_time() + AVAudioTime.hostTime(forSeconds: seconds))
+    }
+
+    /// Waits while letting the engine render in real time.
+    private func wait(seconds: TimeInterval) {
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: seconds))
+    }
 }
