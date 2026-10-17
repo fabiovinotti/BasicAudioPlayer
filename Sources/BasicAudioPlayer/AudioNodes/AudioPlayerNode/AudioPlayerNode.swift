@@ -94,13 +94,18 @@ public class AudioPlayerNode {
     
     /// The playback point within the timeline of the loaded audio file, in seconds.
     ///
+    /// When playback is scheduled to start later with ``play(at:)``, the value
+    /// stays at ``segmentStart`` until playback begins.
+    ///
     /// - Important: The underlying AVAudioPlayerNode must be attached to an engine
     ///   for this property to return meaningful values during playback.
     public var currentTime: TimeInterval {
         let currentTime: TimeInterval
         
         if let pt = node.playerTime {
-            let sampleTime = pt.sampleTime - (sampleTimeOffset ?? 0)
+            // The player's timeline is 0 when playback begins and negative
+            // before that, including while waiting for a delayed start.
+            let sampleTime = max(0, pt.sampleTime)
             let playerTimeInterval = Double(sampleTime) / pt.sampleRate
             currentTime = segmentStart + playerTimeInterval
         } else if status == .paused {
@@ -121,10 +126,6 @@ public class AudioPlayerNode {
     
     /// The loaded audio file.
     public private(set) var file: AVAudioFile?
-    
-    /// When AVAudioPlayerNode starts playing after a scheduling event its sample time
-    /// is not 0 as expected. This offset is subtracted when computing ``currentTime``.
-    private var sampleTimeOffset: AVAudioFramePosition?
     
     /// The playback time elapsed before pausing or stopping the node.
     private var timeElapsedBeforeStop: TimeInterval = 0
@@ -221,7 +222,6 @@ public class AudioPlayerNode {
         
         node.prepare(withFrameCount: frameCount)
         needsScheduling = false
-        sampleTimeOffset = nil
     }
     
     // MARK: - Controlling Playback
@@ -267,11 +267,6 @@ public class AudioPlayerNode {
         }
         
         node.play(at: when)
-        
-        // Collect the offset of the sample time if it is nil.
-        if sampleTimeOffset == nil, let pt = node.playerTime {
-            sampleTimeOffset = pt.sampleTime
-        }
         
         status = .playing
     }
